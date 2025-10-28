@@ -68,7 +68,7 @@ const WhyMket = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-600 bg-clip-text text-transparent mb-6 font-zendots leading-tight">
+          <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-600 bg-clip-text text-transparent mb-6 font-zendots leading-tight">
             Why We Built MKET?
           </h2>
           <p className="text-[19px] md:text-2xl text-gray-700 font-medium max-w-4xl  mx-auto leading-relaxed">
@@ -85,26 +85,27 @@ const WhyMket = () => {
           </p>
         </motion.div>
 
-        {/* Origin Story — Narrative Block */}
+        {/* Origin Story — Short, Fast, Real */}
         <motion.div
-          className="max-w-5xl mx-auto mb-24 bg-white p-10 rounded-3xl shadow-xl border border-purple-100"
+          className="max-w-4xl mx-auto mb-20 bg-white p-8 rounded-3xl shadow-md border border-purple-100"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.3 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
           viewport={{ once: true }}
         >
           <div className="flex items-start gap-4">
             <FaLightbulb className="text-yellow-500 text-3xl mt-1 flex-shrink-0" />
             <div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-3 font-inter">
-                It Started With a Scam
+              <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 font-inter">
+                It Started With the Stress of Buying
               </h3>
               <p className="text-gray-700 leading-relaxed font-instrument">
-                A final-year student lost ₦45,000 on a “MacBook” that never
-                existed. A freshman sold her phone and got paid with fake
-                transfer alerts.
-                <span className="block mt-3 text-purple-700 font-semibold">
-                  We were there. We saw it. We said: <em>Never again.</em>
+                Finding simple things on campus was exhausting — too many
+                groups, too much noise. <br /> So we built {"  "}
+                <strong className="text-purple-700">MKET- </strong>{" "}
+                <span className="text-purple-500">
+                  one trusted place where students can buy and sell easily,
+                  without stress or endless group searches.
                 </span>
               </p>
             </div>

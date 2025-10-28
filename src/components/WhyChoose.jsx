@@ -83,7 +83,7 @@ const WhyChoose = () => {
           <h3 className="text-2xl font-bold mb-3">The Hard Truth:</h3>
           <p className="text-purple-50 leading-relaxed">
             Other platforms treat students like side users.
-            <strong> MKET makes you like the main character.</strong>
+            <strong> MKET makes you the main character.</strong>
           </p>
         </div>
       </div>
