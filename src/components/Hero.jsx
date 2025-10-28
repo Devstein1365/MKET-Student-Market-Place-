@@ -24,7 +24,7 @@ const Hero = () => {
           className="absolute bottom-32 right-16 text-purple-600"
         >
           <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
           </svg>
         </motion.div>
       </div>
@@ -39,14 +39,19 @@ const Hero = () => {
             className="text-center md:text-left"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight">
-              Trade Smart.<br />
-              <span className="text-purple-700">No Scams.</span><br />
+              Trade Smart.
+              <br />
+              <span className="text-purple-700">No Scams.</span>
+              <br />
               Just FUTMINNA.
             </h1>
 
             <p className="mt-6 text-lg text-gray-700 max-w-lg mx-auto md:mx-0">
               Tired of WhatsApp stress? MKET is the{" "}
-              <span className="font-semibold text-purple-700">only verified student marketplace</span> — post, chat, meet, pay. All on campus. All safe.
+              <span className="font-semibold text-purple-700">
+                only verified student marketplace
+              </span>{" "}
+              — post, chat, meet, pay. All on campus. All safe.
             </p>
 
             <p className="mt-4 text-sm text-gray-500 italic">
@@ -60,23 +65,40 @@ const Hero = () => {
                 whileTap={{ scale: 0.95 }}
                 className="inline-flex items-center bg-purple-700 hover:bg-purple-900 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transition-all duration-200"
                 onClick={() => {
-                  const emailInput = prompt("Enter your FUTMINNA email to get early access:");
+                  const emailInput = prompt(
+                    "Enter your FUTMINNA email to get early access:"
+                  );
                   if (emailInput && emailInput.includes("@futminna.edu.ng")) {
-                    alert(`Welcome, ${emailInput.split("@")[0]}! You're in. Launch: Dec 2025.`);
+                    alert(
+                      `Welcome, ${
+                        emailInput.split("@")[0]
+                      }! You're in. Launch: Dec 2025.`
+                    );
                   } else if (emailInput) {
                     alert("Please use your valid FUTMINNA email.");
                   }
                 }}
               >
                 Get Early Access
-                <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="ml-2 w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </motion.button>
             </div>
 
             <p className="mt-3 text-xs text-gray-500">
-              Launching <span className="font-semibold">December 2025</span> — Be the first.
+              Launching <span className="font-semibold">December 2025</span> —
+              Be the first.
             </p>
           </motion.div>
 
@@ -96,7 +118,9 @@ const Hero = () => {
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-1">
                       <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-xs font-bold text-gray-800">MKET</span>
+                      <span className="text-xs font-bold text-gray-800">
+                        MKET
+                      </span>
                     </div>
                     <div className="text-xs text-gray-500">9:41 AM</div>
                   </div>
@@ -106,16 +130,24 @@ const Hero = () => {
                     <div className="flex space-x-3">
                       <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16"></div>
                       <div className="flex-1">
-                        <h3 className="font-semibold text-sm">PHY 112 Textbook</h3>
-                        <p className="text-xs text-gray-600">Like New • Bosso Hostel</p>
-                        <p className="text-lg font-bold text-purple-700">₦2,500</p>
+                        <h3 className="font-semibold text-sm">
+                          PHY 112 Textbook
+                        </h3>
+                        <p className="text-xs text-gray-600">
+                          Like New • Bosso Hostel
+                        </p>
+                        <p className="text-lg font-bold text-purple-700">
+                          ₦2,500
+                        </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Chat Bubble */}
                   <div className="absolute bottom-20 left-6 bg-purple-600 text-white px-4 py-2 rounded-2xl rounded-bl-none shadow-lg max-w-[180px]">
-                    <p className="text-sm font-medium">Is this still available?</p>
+                    <p className="text-sm font-medium">
+                      Is this still available?
+                    </p>
                     <p className="text-xs opacity-80">Just now</p>
                   </div>
 
@@ -127,7 +159,11 @@ const Hero = () => {
                       className="flex-1 bg-transparent text-sm outline-none"
                       disabled
                     />
-                    <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                    <svg
+                      className="w-5 h-5 text-purple-600"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
                       <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
                     </svg>
                   </div>
@@ -143,8 +179,15 @@ const Hero = () => {
 
       {/* Wave Bottom */}
       <div className="absolute bottom-0 left-0 right-0">
-        <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 120L60 105C120 90 240 60 360 50C480 40 600 50 720 60C840 70 960 80 1080 75C1200 70 1320 50 1380 40L1440 30V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="white"/>
+        <svg
+          viewBox="0 0 1440 120"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 120L60 105C120 90 240 60 360 50C480 40 600 50 720 60C840 70 960 80 1080 75C1200 70 1320 50 1380 40L1440 30V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+            fill="white"
+          />
         </svg>
       </div>
     </section>
