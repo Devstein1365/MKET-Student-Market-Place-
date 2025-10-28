@@ -2,6 +2,7 @@ import React from "react";
 import Nav from "../components/Nav";
 import Hero from "../components/Hero";
 import WhyChoose from "../components/WhyChoose";
+import WhyMket from "../components/WhyMket";
 
 const Home = () => {
   return (
@@ -12,6 +13,7 @@ const Home = () => {
       <Hero />
       {/* Why Choose Us section  */}
       <WhyChoose />
+      <WhyMket/>
     </div>
   );
 };
