@@ -1,125 +1,192 @@
-import { FaLock, FaBolt, FaUsers, FaBrain } from "react-icons/fa";
+import {
+  FaLock,
+  FaBolt,
+  FaUsers,
+  FaBrain,
+  FaLeaf,
+  FaRocket,
+  FaHeart,
+  FaLightbulb,
+} from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const WhyMket = () => {
-  const values = [
+  const pillars = [
     {
-      icon: <FaLock className="text-primary text-4xl mb-3" />,
-      title: "Trust First",
-      desc: "Every user is verified — because trust isn’t optional, it’s the foundation.",
+      icon: <FaLock className="text-purple-600 text-5xl mb-5" />,
+      title: "Verified Students Only",
+      desc: "We don't just verify emails — we verify *reality*. Only students. Only your campus. Scammers get auto-blocked before they type “hello”.",
+      color: "from-purple-100 to-purple-50",
     },
     {
-      icon: <FaBolt className="text-primary text-4xl mb-3" />,
-      title: "Simplicity Wins",
-      desc: "From listing to meetup, MKET keeps everything frictionless. Fast. Familiar. Fun.",
+      icon: <FaBolt className="text-purple-600 text-5xl mb-5" />,
+      title: "Trade in Minutes, Not Days",
+      desc: "Post in 30 seconds. Find in 10. Meet in 5. No apps. No shipping. Just walk to the gate. Done.",
+      color: "from-indigo-100 to-indigo-50",
     },
     {
-      icon: <FaUsers className="text-primary text-4xl mb-3" />,
-      title: "Community Over Competition",
-      desc: "Every deal builds connection. Every connection shapes the next generation of student entrepreneurs.",
+      icon: <FaBrain className="text-purple-600 text-5xl mb-5" />,
+      title: "Smart Listings, Written for You",
+      desc: "Upload a blurry photo → get a pro description. “Used laptop, 8GB, minor scratch” — AI writes it. You just click post.",
+      color: "from-violet-100 to-violet-50",
     },
     {
-      icon: <FaBrain className="text-primary text-4xl mb-3" />,
-      title: "Innovation for Impact",
-      desc: "From AI-powered listings to secure transactions, we use technology to make campus life smarter, not harder.",
+      icon: <FaUsers className="text-purple-600 text-5xl mb-5" />,
+      title: "Campus-First Connections",
+      desc: "Every sale is a connection. Every review is reputation. This isn’t eBay — it’s your campus social network with prices.",
+      color: "from-purple-100 to-purple-50",
+    },
+    {
+      icon: <FaLeaf className="text-purple-600 text-5xl mb-5" />,
+      title: "Every Sale, One Less Waste",
+      desc: "Reuse > Recycle > Regret. One textbook resold = one tree saved. One dorm chair = one less landfill trip.",
+      color: "from-emerald-100 to-emerald-50",
+    },
+    {
+      icon: <FaRocket className="text-purple-600 text-5xl mb-5" />,
+      title: "Free Forever — Until You Grow",
+      desc: "No fees. No ads. No tricks. We grow with you — monetization only when you demand premium tools.",
+      color: "from-pink-100 to-pink-50",
     },
   ];
 
   return (
-    <section id="why-mket" className="bg-white py-24 relative overflow-hidden">
-      {/* Background effect */}
-      <div className="absolute inset-0 bg-gradient-to-b from-blue-50 via-white to-blue-50 opacity-60 pointer-events-none"></div>
+    <section
+      id="why-mket"
+      className="py-32 bg-gradient-to-b from-white via-purple-50 to-white relative overflow-hidden"
+    >
+      {/* Floating Elements */}
+      <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
+      <div className="absolute bottom-32 right-20 w-96 h-96 bg-indigo-200 rounded-full filter blur-3xl opacity-20 animate-pulse delay-1000"></div>
 
-      <div className="relative max-w-7xl mx-auto px-6 text-center">
-        {/* Section Title */}
-        <motion.h2
-          className="text-3xl md:text-5xl font-zendots text-gray-900 mb-6"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          Why MKET?
-        </motion.h2>
-
-        {/* Tagline */}
-        <motion.p
-          className="text-lg font-instrument text-gray-600 max-w-3xl mx-auto mb-12"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
-          Because every campus deserves its own economy — built by students, powered by trust, and designed for tomorrow.
-        </motion.p>
-
-        {/* Brand Story */}
+      <div className="relative max-w-7xl mx-auto px-6">
+        {/* Hero Title */}
         <motion.div
-          className="max-w-4xl mx-auto mb-16"
-          initial={{ opacity: 0, y: 40 }}
+          className="text-center mb-20"
+          initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
+          transition={{ duration: 0.8 }}
+          viewport={{ once: true }}
         >
-          <p className="font-instrument text-gray-700 text-lg leading-relaxed">
-            MKET started with one frustration — students getting scammed, ignored, or overcharged
-            on platforms never built for them. Born from real campus experience, MKET was designed
-            from the ground up to make student trade smarter, safer, and community-driven.
-          </p>
-
-          <p className="font-instrument text-gray-700 text-lg leading-relaxed mt-4">
-            Our vision is simple — to power a trusted, student-led economy across every African university,
-            where ideas, goods, and opportunities flow as freely as friendships.
+          <h2 className="text-4xl md:text-7xl font-bold bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-600 bg-clip-text text-transparent mb-6 font-zendots leading-tight">
+            Why We Built MKET?
+          </h2>
+          <p className="text-[19px] md:text-2xl text-gray-700 font-medium max-w-4xl  mx-auto leading-relaxed">
+            Because{" "}
+            <span className="text-purple-700 font-bold">
+              campus trading isn't safe on WhatsApp
+            </span>
+            . <br />
+            Because{" "}
+            <span className="text-purple-700 font-bold">
+              you deserve a marketplace made for you
+            </span>
+            . <br />
           </p>
         </motion.div>
 
-        {/* Values Grid */}
+        {/* Origin Story — Narrative Block */}
         <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16"
-          initial="hidden"
-          whileInView="visible"
+          className="max-w-5xl mx-auto mb-24 bg-white p-10 rounded-3xl shadow-xl border border-purple-100"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7, delay: 0.3 }}
           viewport={{ once: true }}
-          transition={{ staggerChildren: 0.15 }}
         >
-          {values.map((value, index) => (
+          <div className="flex items-start gap-4">
+            <FaLightbulb className="text-yellow-500 text-3xl mt-1 flex-shrink-0" />
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900 mb-3 font-inter">
+                It Started With a Scam
+              </h3>
+              <p className="text-gray-700 leading-relaxed font-instrument">
+                A final-year student lost ₦45,000 on a “MacBook” that never
+                existed. A freshman sold her phone and got paid with fake
+                transfer alerts.
+                <span className="block mt-3 text-purple-700 font-semibold">
+                  We were there. We saw it. We said: <em>Never again.</em>
+                </span>
+              </p>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Pillars Grid — Staggered Animation */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-20">
+          {pillars.map((pillar, index) => (
             <motion.div
               key={index}
-              className="bg-blue-50 rounded-2xl p-8 shadow-sm hover:shadow-lg transition duration-300"
-              initial={{ opacity: 0, y: 40 }}
+              className={`relative bg-linear-to-br ${pillar.color} p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all duration-500 group cursor-pointer transform hover:-translate-y-2`}
+              initial={{ opacity: 0, y: 60 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              transition={{ duration: 0.6, delay: index * 0.15 }}
+              viewport={{ once: true }}
+              whileHover={{ scale: 1.03 }}
             >
-              <div className="flex flex-col items-center text-center">
-                {value.icon}
-                <h3 className="font-inter text-xl font-semibold mb-2 text-gray-900">
-                  {value.title}
+              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-3xl transition-opacity"></div>
+              <div className="relative z-10 text-center">
+                <div className="inline-block p-4 bg-white rounded-2xl shadow-md mb-6 group-hover:shadow-lg transition-shadow">
+                  {pillar.icon}
+                </div>
+                <h3 className="text-xl font-bold text-gray-900 mb-3 font-inter">
+                  {pillar.title}
                 </h3>
-                <p className="text-gray-600 font-instrument text-sm leading-relaxed">
-                  {value.desc}
+                <p className="text-gray-600 text-sm leading-relaxed font-instrument">
+                  {pillar.desc}
                 </p>
+              </div>
+              <div className="absolute top-4 right-4 text-purple-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                <FaHeart className="text-xl" />
               </div>
             </motion.div>
           ))}
-        </motion.div>
+        </div>
 
-        {/* Closing Call to Action */}
+        {/* Vision Statement — Full Bleed */}
         <motion.div
+          className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white p-12 rounded-3xl shadow-2xl max-w-6xl mx-auto"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4 }}
-          className="max-w-3xl mx-auto"
+          transition={{ duration: 0.8, delay: 0.5 }}
+          viewport={{ once: true }}
         >
-          <h3 className="font-zendots text-2xl text-primary mb-3">
-            More Than a Marketplace — A Movement.
-          </h3>
-          <p className="font-instrument text-gray-700 text-lg mb-8">
-            MKET isn’t just where students trade — it’s where they belong, build, and begin.
-            This is the foundation of the next-generation student economy.
-          </p>
+          <div className="text-center">
+            <h3 className="text-3xl md:text-4xl font-bold mb-6 font-zendots">
+              This Isn’t Just an App
+            </h3>
+            <p className="text-lg md:text-xl leading-relaxed max-w-4xl mx-auto font-instrument text-purple-50">
+              MKET is{" "}
+              <strong>
+                building an Africa's student-driven digital economy
+              </strong>
+              . where every sale fuels the next entrepreneur. Every review
+              builds reputation. Every transaction builds trust.
+              <span className="block mt-4 text-yellow-300 text-[20px]">
+                This is where the next generation of campus founders begin.
+              </span>
+            </p>
+          </div>
+        </motion.div>
 
+        {/* Final CTA */}
+        <motion.div
+          className="text-center mt-20"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 0.7 }}
+          viewport={{ once: true }}
+        >
           <a
             href="/auth"
-            className="inline-block px-8 py-3 bg-primary text-white font-inter rounded-lg hover:bg-blue-700 transition"
+            aria-label="Join the MKET platform"
+            className="inline-flex items-center gap-3 px-8 py-5 bg-purple-600 text-white text-[16px] font-bold rounded-full hover:bg-purple-700 transition-all transform hover:scale-105 shadow-xl hover:shadow-2xl"
           >
-            Join the Movement
+            <FaRocket className="text-xl" />
+            Start Trading Smarter on Campus
           </a>
+          <p className="mt-6 text-gray-600 font-instrument">
+            <em>Free for students. Built in FUTMINNA.</em>
+          </p>
         </motion.div>
       </div>
     </section>
