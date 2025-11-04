@@ -52,14 +52,15 @@ const ProfileHeader = ({
       {/* Bio */}
       {isEditMode ? (
         <textarea
-          value={profileData.bio}
+          value={profileData.bio || ""}
           onChange={(e) => onEdit({ ...profileData, bio: e.target.value })}
-          className="w-full text-sm text-gray-600 font-instrument border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7E22CE]"
+          placeholder="Tell us about yourself..."
+          className="w-full text-sm text-gray-600 font-instrument border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-[#7E22CE] mb-4"
           rows={3}
         />
       ) : (
         <p className="text-sm text-gray-600 font-instrument mb-4">
-          {profileData.bio}
+          {profileData.bio || "No bio yet"}
         </p>
       )}
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaHome,
@@ -18,16 +18,8 @@ import Avatar from "../shared/Avatar";
 
 const Sidebar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { user, logout } = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-
-  const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      logout();
-      navigate("/auth", { replace: true });
-    }
-  };
+  const { user } = useAuth();
+  const [isCollapsed, setIsCollapsed] = useState(true); // Start collapsed by default
 
   const menuItems = [
     { name: "Home", path: "/dashboard", icon: FaHome },
@@ -39,7 +31,6 @@ const Sidebar = () => {
 
   const bottomItems = [
     { name: "Settings", path: "/dashboard/settings", icon: FaCog },
-    { name: "Logout", path: "/logout", icon: FaSignOutAlt, isAction: true },
   ];
 
   const isActive = (path) => {
@@ -168,32 +159,6 @@ const Sidebar = () => {
         {bottomItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.path);
-
-          // Handle logout action
-          if (item.isAction && item.name === "Logout") {
-            return (
-              <button
-                key={item.name}
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all group text-red-500 hover:bg-red-50"
-              >
-                <Icon className="text-xl" />
-                <AnimatePresence mode="wait">
-                  {!isCollapsed && (
-                    <motion.span
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -10 }}
-                      transition={{ duration: 0.2 }}
-                      className="font-inter font-medium"
-                    >
-                      {item.name}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </button>
-            );
-          }
 
           return (
             <Link

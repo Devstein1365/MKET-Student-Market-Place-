@@ -15,6 +15,7 @@ const Avatar = ({
     md: "w-12 h-12 text-base",
     lg: "w-16 h-16 text-lg",
     xl: "w-24 h-24 text-2xl",
+    "2xl": "w-32 h-32 text-3xl",
   };
 
   const statusSizes = {
@@ -23,6 +24,7 @@ const Avatar = ({
     md: "w-3 h-3 border-2",
     lg: "w-4 h-4 border-2",
     xl: "w-5 h-5 border-2",
+    "2xl": "w-6 h-6 border-2",
   };
 
   const statusColors = {

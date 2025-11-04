@@ -12,6 +12,7 @@ import PostItem from "./pages/dashboard/PostItem";
 import ProductDetails from "./pages/dashboard/ProductDetails";
 import Messages from "./pages/dashboard/Messages";
 import Profile from "./pages/dashboard/Profile";
+import Settings from "./pages/dashboard/Settings";
 
 const App = () => {
   return (
@@ -38,14 +39,7 @@ const App = () => {
               <Route path="post" element={<PostItem />} />
               <Route path="chat" element={<Messages />} />
               <Route path="profile" element={<Profile />} />
-              <Route
-                path="settings"
-                element={
-                  <div className="p-8 text-center">
-                    Settings Page Coming Soon
-                  </div>
-                }
-              />
+              <Route path="settings" element={<Settings />} />
             </Route>
 
             {/* 404 */}
