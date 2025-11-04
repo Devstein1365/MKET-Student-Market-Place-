@@ -300,8 +300,8 @@ const DashboardHome = () => {
                 className="flex flex-wrap gap-4"
               >
                 {filteredProducts.map((product) => (
-                  <motion.div 
-                    key={product.id} 
+                  <motion.div
+                    key={product.id}
                     variants={itemVariants}
                     className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] xl:w-[calc(25%-0.75rem)]"
                   >
