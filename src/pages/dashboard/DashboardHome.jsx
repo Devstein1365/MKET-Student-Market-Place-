@@ -51,7 +51,8 @@ const DashboardHome = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        const data = await productsService.getTrendingProducts(12);
+        // Get all products instead of limiting to 12
+        const data = await productsService.getAllProducts();
         // Shuffle products using Fisher-Yates algorithm for variety
         const shuffledData = shuffleArray(data);
         setProducts(shuffledData);
@@ -73,7 +74,8 @@ const DashboardHome = () => {
       !searchQuery &&
       filters.category === "all" &&
       filters.condition === "all" &&
-      filters.location === "all"
+      filters.location === "all" &&
+      filters.sortBy === "relevance"
     ) {
       return; // Let the initial load handle showing products
     }
@@ -308,15 +310,6 @@ const DashboardHome = () => {
                   </motion.div>
                 ))}
               </motion.div>
-
-              {/* Load more */}
-              {filteredProducts.length >= 12 && (
-                <div className="flex justify-center mt-8">
-                  <Button variant="outline" size="lg">
-                    Load More Products
-                  </Button>
-                </div>
-              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
