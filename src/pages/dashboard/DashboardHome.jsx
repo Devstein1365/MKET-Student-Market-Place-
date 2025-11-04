@@ -297,10 +297,14 @@ const DashboardHome = () => {
                 initial="hidden"
                 animate="visible"
                 variants={containerVariants}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                className="flex flex-wrap gap-4"
               >
                 {filteredProducts.map((product) => (
-                  <motion.div key={product.id} variants={itemVariants}>
+                  <motion.div 
+                    key={product.id} 
+                    variants={itemVariants}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.67rem)] xl:w-[calc(25%-0.75rem)]"
+                  >
                     <ProductCard
                       product={product}
                       onClick={() =>
