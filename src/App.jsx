@@ -8,6 +8,7 @@ import DashboardHome from "./pages/dashboard/DashboardHome";
 import Wishlist from "./pages/dashboard/Wishlist";
 import PostItem from "./pages/dashboard/PostItem";
 import ProductDetails from "./pages/dashboard/ProductDetails";
+import Messages from "./pages/dashboard/Messages";
 
 const App = () => {
   return (
@@ -24,12 +25,7 @@ const App = () => {
             <Route path="product/:id" element={<ProductDetails />} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="post" element={<PostItem />} />
-            <Route
-              path="chat"
-              element={
-                <div className="p-8 text-center">Chat Page Coming Soon</div>
-              }
-            />
+            <Route path="chat" element={<Messages />} />
             <Route
               path="profile"
               element={
