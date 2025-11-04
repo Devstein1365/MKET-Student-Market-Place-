@@ -1,0 +1,77 @@
+import React, { createContext, useState, useContext, useEffect } from "react";
+import authService from "../services/authService";
+
+const AuthContext = createContext();
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // Check auth status on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      if (authService.isAuthenticated()) {
+        const currentUser = authService.getCurrentUser();
+        setUser(currentUser);
+      }
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  // Signup function
+  const signup = async (userData) => {
+    const result = authService.signup(userData);
+    if (result.success) {
+      setUser(result.user);
+    }
+    return result;
+  };
+
+  // Login function
+  const login = async (email, password) => {
+    const result = authService.login(email, password);
+    if (result.success) {
+      setUser(result.user);
+    }
+    return result;
+  };
+
+  // Logout function
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+  };
+
+  // Update user profile
+  const updateUser = (updatedData) => {
+    const result = authService.updateCurrentUser(updatedData);
+    if (result.success) {
+      setUser(result.user);
+    }
+    return result;
+  };
+
+  const value = {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    signup,
+    login,
+    logout,
+    updateUser,
+  };
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+};
+
+export default AuthContext;

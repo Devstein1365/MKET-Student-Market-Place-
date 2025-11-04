@@ -8,12 +8,18 @@ import {
   FaEyeSlash,
   FaIdCard,
 } from "react-icons/fa";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 const Auth = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, signup } = useAuth();
   const [activeTab, setActiveTab] = useState("login"); // 'login' or 'signup'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Login state
   const [loginData, setLoginData] = useState({
@@ -63,29 +69,70 @@ const Auth = () => {
   };
 
   // Handle login submit
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login:", loginData);
-    // TODO: Add API call
+    setError("");
+    setLoading(true);
+
+    try {
+      const result = await login(loginData.email, loginData.password);
+
+      if (result.success) {
+        // Redirect to dashboard or the page they came from
+        const from = location.state?.from?.pathname || "/dashboard";
+        navigate(from, { replace: true });
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Handle signup submit
-  const handleSignupSubmit = (e) => {
+  const handleSignupSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
     // Validation
     if (signupData.password !== signupData.confirmPassword) {
-      alert("Passwords do not match!");
+      setError("Passwords do not match!");
       return;
     }
 
     if (!signupData.email.includes("@st.futminna.edu.ng")) {
-      alert("Please use a valid FUTMINNA student email!");
+      setError("Please use a valid FUTMINNA student email!");
       return;
     }
 
-    console.log("Signup:", signupData);
-    // TODO: Add API call
+    if (signupData.password.length < 6) {
+      setError("Password must be at least 6 characters long!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await signup({
+        name: signupData.fullName,
+        email: signupData.email,
+        password: signupData.password,
+        phone: signupData.matricNumber, // Store matric number in phone field for now
+      });
+
+      if (result.success) {
+        // Redirect to dashboard after successful signup
+        navigate("/dashboard", { replace: true });
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -132,6 +179,17 @@ const Auth = () => {
               Sign Up
             </button>
           </div>
+
+          {/* Error Message */}
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
+            >
+              <p className="text-red-600 text-sm font-instrument">{error}</p>
+            </motion.div>
+          )}
 
           <AnimatePresence mode="wait">
             {activeTab === "login" ? (
@@ -209,9 +267,17 @@ const Auth = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="w-full py-3 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter"
+                  disabled={loading}
+                  className="w-full py-3 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Log In
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                      Logging in...
+                    </>
+                  ) : (
+                    "Log In"
+                  )}
                 </motion.button>
               </motion.form>
             ) : (
@@ -386,9 +452,17 @@ const Auth = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   type="submit"
-                  className="w-full py-3 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter"
+                  disabled={loading}
+                  className="w-full py-3 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
-                  Create Account
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                      Creating Account...
+                    </>
+                  ) : (
+                    "Create Account"
+                  )}
                 </motion.button>
               </motion.form>
             )}

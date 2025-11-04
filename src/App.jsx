@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { WishlistProvider } from "./context/WishlistContext";
+import { AuthProvider } from "./context/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 import Home from "./pages/Home";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/Error";
@@ -14,32 +16,43 @@ import Profile from "./pages/dashboard/Profile";
 const App = () => {
   return (
     <BrowserRouter>
-      <WishlistProvider>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/" element={<Home />} />
-          <Route path="/auth" element={<Auth />} />
+      <AuthProvider>
+        <WishlistProvider>
+          <Routes>
+            {/* Public routes */}
+            <Route path="/" element={<Home />} />
+            <Route path="/auth" element={<Auth />} />
 
-          {/* Dashboard routes - nested */}
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<DashboardHome />} />
-            <Route path="product/:id" element={<ProductDetails />} />
-            <Route path="wishlist" element={<Wishlist />} />
-            <Route path="post" element={<PostItem />} />
-            <Route path="chat" element={<Messages />} />
-            <Route path="profile" element={<Profile />} />
+            {/* Dashboard routes - nested and protected */}
             <Route
-              path="settings"
+              path="/dashboard"
               element={
-                <div className="p-8 text-center">Settings Page Coming Soon</div>
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
               }
-            />
-          </Route>
+            >
+              <Route index element={<DashboardHome />} />
+              <Route path="product/:id" element={<ProductDetails />} />
+              <Route path="wishlist" element={<Wishlist />} />
+              <Route path="post" element={<PostItem />} />
+              <Route path="chat" element={<Messages />} />
+              <Route path="profile" element={<Profile />} />
+              <Route
+                path="settings"
+                element={
+                  <div className="p-8 text-center">
+                    Settings Page Coming Soon
+                  </div>
+                }
+              />
+            </Route>
 
-          {/* 404 */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </WishlistProvider>
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </WishlistProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 };

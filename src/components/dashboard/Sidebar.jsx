@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaHome,
@@ -12,18 +12,21 @@ import {
   FaBars,
   FaTimes,
 } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 import Logo from "../ui/Logo";
 import Avatar from "../shared/Avatar";
 
 const Sidebar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Mock user data - will be replaced with actual auth data
-  const user = {
-    name: "Oligwu Michael",
-    email: "oligwu.m2203183@st.futminna.edu.ng",
-    avatar: null,
+  const handleLogout = () => {
+    if (window.confirm("Are you sure you want to logout?")) {
+      logout();
+      navigate("/auth", { replace: true });
+    }
   };
 
   const menuItems = [
@@ -166,6 +169,32 @@ const Sidebar = () => {
           const Icon = item.icon;
           const active = isActive(item.path);
 
+          // Handle logout action
+          if (item.isAction && item.name === "Logout") {
+            return (
+              <button
+                key={item.name}
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-lg transition-all group text-red-500 hover:bg-red-50"
+              >
+                <Icon className="text-xl" />
+                <AnimatePresence mode="wait">
+                  {!isCollapsed && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.2 }}
+                      className="font-inter font-medium"
+                    >
+                      {item.name}
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </button>
+            );
+          }
+
           return (
             <Link
               key={item.name}
@@ -173,9 +202,7 @@ const Sidebar = () => {
               className={`
                 flex items-center gap-3 px-3 py-3 rounded-lg transition-all group
                 ${
-                  item.isAction
-                    ? "text-red-500 hover:bg-red-50"
-                    : active
+                  active
                     ? "bg-gray-100 text-[#7E22CE]"
                     : "text-[#4B5563] hover:bg-gray-100"
                 }
