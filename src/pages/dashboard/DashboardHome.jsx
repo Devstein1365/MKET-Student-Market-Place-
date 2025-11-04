@@ -21,16 +21,6 @@ import productsService, {
   categories as categoriesData,
 } from "../../services/productsService";
 
-// Fisher-Yates shuffle algorithm for randomizing array
-const shuffleArray = (array) => {
-  const shuffled = [...array]; // Create a copy to avoid mutating original
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
-  }
-  return shuffled;
-};
-
 const DashboardHome = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
@@ -51,12 +41,10 @@ const DashboardHome = () => {
     const loadProducts = async () => {
       setLoading(true);
       try {
-        // Get all products instead of limiting to 12
+        // Get all products
         const data = await productsService.getAllProducts();
-        // Shuffle products using Fisher-Yates algorithm for variety
-        const shuffledData = shuffleArray(data);
-        setProducts(shuffledData);
-        setFilteredProducts(shuffledData);
+        setProducts(data);
+        setFilteredProducts(data);
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
