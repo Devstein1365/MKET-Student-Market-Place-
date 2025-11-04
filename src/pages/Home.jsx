@@ -3,17 +3,29 @@ import Nav from "../components/Nav";
 import Hero from "../components/Hero";
 import WhyChoose from "../components/WhyChoose";
 import WhyMket from "../components/WhyMket";
+import FAQ from "../components/FAQ";
+import Footer from "../components/Footer";
 
 const Home = () => {
   return (
-    <div className="min-h-screen">
-      {/* header section  */}
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
       <Nav />
-      {/* Hero section  */}
+
+      {/* Hero Section */}
       <Hero />
-      {/* Why Choose Us section  */}
+
+      {/* Why Choose Us Section */}
       <WhyChoose />
-      <WhyMket/>
+
+      {/* Why MKET Section */}
+      <WhyMket />
+
+      {/* FAQ Section */}
+      <FAQ />
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };

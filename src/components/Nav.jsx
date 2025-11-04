@@ -35,11 +35,7 @@ const Nav = () => {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className={`font-medium transition-colors cursor-pointer duration-200 ${
-                  link.highlight
-                    ? "text-purple-500 hover:text-purple-700"
-                    : "text-purple-600 hover:text-purple-700"
-                }`}
+                className="text-[#111827] hover:text-[#7E22CE] font-medium transition-colors cursor-pointer duration-200 font-inter"
               >
                 {link.label}
               </button>
@@ -49,7 +45,7 @@ const Nav = () => {
           {/* Desktop: Login (right side) */}
           <div className="flex items-center">
             <Link to="/auth">
-              <button className="text-white/90 bg-purple-700 px-[23px] py-[5px] rounded-full text-[19px] font-semibold hover:text-white font-transition-colors duration-200">
+              <button className="text-white bg-[#7E22CE] hover:bg-[#6B1FB0] px-6 py-2 rounded-full font-semibold transition-all duration-200 shadow-lg hover:shadow-xl">
                 Login
               </button>
             </Link>
@@ -59,7 +55,7 @@ const Nav = () => {
           <div className="flex md:hidden items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-purple-800 p-2 hover:bg-white/10 rounded-md transition-colors"
+              className="text-[#7E22CE] p-2 hover:bg-white/10 rounded-md transition-colors"
               aria-label="Toggle menu"
             >
               {isMobileMenuOpen ? (
@@ -80,16 +76,16 @@ const Nav = () => {
               <button
                 key={link.id}
                 onClick={() => scrollToSection(link.id)}
-                className={`block w-full text-left hover:bg-white/10 font-medium px-3 py-2 rounded-md transition-colors duration-200 ${
-                  link.highlight
-                    ? "text-purple-500 hover:text-purple-700"
-                    : "text-purple-600 hover:text-purple-700"
-                }`}
+                className="block w-full text-left text-[#111827] hover:text-[#7E22CE] hover:bg-white/10 font-medium px-3 py-2 rounded-md transition-colors duration-200 font-inter"
               >
                 {link.label}
               </button>
             ))}
-            <Link to="/auth" className="block"></Link>
+            <Link to="/auth" className="block">
+              <button className="w-full text-white bg-[#7E22CE] hover:bg-[#6B1FB0] font-semibold px-3 py-2 rounded-full transition-colors duration-200">
+                Login
+              </button>
+            </Link>
           </div>
         </div>
       )}

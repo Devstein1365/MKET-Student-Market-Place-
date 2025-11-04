@@ -1,14 +1,13 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const Logo = () => {
   return (
-    <>
-      <div>
-        <h1 className="bg-linear-to-r from-purple-800 via-purple-600 to-gray-400 text-transparent bg-clip-text text-[25px] p-[9px] font-bold rounded-[13px] leading-relaxed">
-          MKet
-        </h1>
-      </div>
-    </>
+    <Link to="/" className="shrink-0">
+      <h1 className="font-zen text-2xl bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-transparent bg-clip-text font-bold cursor-pointer hover:scale-105 transition-transform duration-200">
+        MKET
+      </h1>
+    </Link>
   );
 };
 

@@ -7,6 +7,7 @@ import {
   FaBrain,
   FaHandshake,
 } from "react-icons/fa";
+import { motion } from "framer-motion";
 
 const WhyChoose = () => {
   const differentiators = [
@@ -54,7 +55,8 @@ const WhyChoose = () => {
         <p className="text-lg text-gray-700 font-medium max-w-3xl mx-auto mb-14 leading-relaxed">
           Built From Campus Up, Not From Corporate Rooms.
           <span className="block mt-2 text-purple-700 font-semibold">
-            Simple. Safe. Student-first. Everything you need to buy, sell, and connect — all in one place
+            Simple. Safe. Student-first. Everything you need to buy, sell, and
+            connect — all in one place
           </span>
         </p>
 

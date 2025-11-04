@@ -53,7 +53,7 @@ const WhyMket = () => {
   return (
     <section
       id="why-mket"
-      className="py-32 bg-gradient-to-b from-white via-purple-50 to-white relative overflow-hidden"
+      className="py-32 bg-linear-to-b from-white via-purple-50 to-white relative overflow-hidden"
     >
       {/* Floating Elements */}
       <div className="absolute top-20 left-10 w-72 h-72 bg-purple-200 rounded-full filter blur-3xl opacity-20 animate-pulse"></div>
@@ -68,7 +68,7 @@ const WhyMket = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-purple-700 via-purple-500 to-indigo-600 bg-clip-text text-transparent mb-6 font-zendots leading-tight">
+          <h2 className="text-4xl md:text-6xl font-bold bg-linear-to-r from-purple-700 via-purple-500 to-indigo-600 bg-clip-text text-transparent mb-6 font-zendots leading-tight">
             Why We Built MKET?
           </h2>
           <p className="text-[19px] md:text-2xl text-gray-700 font-medium max-w-4xl  mx-auto leading-relaxed">
@@ -94,7 +94,7 @@ const WhyMket = () => {
           viewport={{ once: true }}
         >
           <div className="flex items-start gap-4">
-            <FaLightbulb className="text-yellow-500 text-3xl mt-1 flex-shrink-0" />
+            <FaLightbulb className="text-yellow-500 text-3xl mt-1 shrink-0" />
             <div>
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 font-inter">
                 It Started With the Stress of Buying
@@ -145,7 +145,7 @@ const WhyMket = () => {
 
         {/* Vision Statement — Full Bleed */}
         <motion.div
-          className="bg-gradient-to-r from-purple-600 via-purple-700 to-indigo-700 text-white p-12 rounded-3xl shadow-2xl max-w-6xl mx-auto"
+          className="bg-linear-to-r from-purple-600 via-purple-700 to-indigo-700 text-white p-12 rounded-3xl shadow-2xl max-w-6xl mx-auto"
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.5 }}

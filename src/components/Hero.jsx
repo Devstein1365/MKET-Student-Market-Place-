@@ -1,32 +1,26 @@
-// src/components/Hero.jsx
 import React from "react";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-linear-to-br from-green-50 via-white to-purple-50 pt-20 pb-32 md:pt-24 md:pb-40">
-      {/* Floating Background Icons - Subtle */}
+    <section className="relative overflow-hidden bg-[#FFFFFF] pt-20 pb-32 md:pt-24 md:pb-40">
+      {/* Gradient Background Blobs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 0.3 }}
-          transition={{ duration: 1.5, delay: 0.5 }}
-          className="absolute top-20 left-10 text-purple-400"
-        >
-          <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-          </svg>
-        </motion.div>
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.1 }}
+          transition={{ duration: 2, delay: 0.3 }}
+          className="absolute top-20 -left-20 w-96 h-96 rounded-full"
+          style={{ background: "linear-gradient(135deg, #7E22CE, #14B8A6)" }}
+        />
         <motion.div
-          initial={{ y: 100, opacity: 0 }}
-          animate={{ y: 0, opacity: 0.2 }}
-          transition={{ duration: 1.5, delay: 0.8 }}
-          className="absolute bottom-32 right-16 text-purple-600"
-        >
-          <svg className="w-20 h-20" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" />
-          </svg>
-        </motion.div>
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.08 }}
+          transition={{ duration: 2, delay: 0.6 }}
+          className="absolute bottom-32 -right-20 w-[500px] h-[500px] rounded-full"
+          style={{ background: "linear-gradient(225deg, #14B8A6, #7E22CE)" }}
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -35,144 +29,219 @@ const Hero = () => {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center md:text-left"
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="text-center md:text-left relative z-10"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-800 leading-tight">
-              Trade Smart.
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="inline-block mb-4 px-4 py-2 bg-[#7E22CE]/10 rounded-full"
+            >
+              <span className="text-[#7E22CE] font-semibold text-sm font-inter">
+                🎓 Built for Students, By Students
+              </span>
+            </motion.div>
+
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#111827] leading-tight mb-6 font-inter">
+              Buy & Sell on Campus.
               <br />
-              <span className="text-purple-700">No Scams.</span>
-              <br />
-              Just FUTMINNA.
+              <span className="bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-transparent bg-clip-text">
+                Fast. Safe. Simple.
+              </span>
             </h1>
 
-            <p className="mt-6 text-lg text-gray-700 max-w-lg mx-auto md:mx-0">
-              Tired of WhatsApp stress? MKET is the{" "}
-              <span className="font-semibold text-purple-700">
-                only verified student marketplace
-              </span>{" "}
-              — post, chat, meet, pay. All on campus. All safe.
+            <p className="mt-6 text-lg text-[#4B5563] max-w-lg mx-auto md:mx-0 leading-relaxed font-instrument">
+              The only verified student marketplace for buying, selling, and
+              trading items on campus.
+              <span className="font-semibold text-[#7E22CE]">
+                {" "}
+                No scams. No strangers. Just your campus community.
+              </span>
             </p>
 
-            <p className="mt-4 text-sm text-gray-500 italic">
-              Only FUTMINNA emails. No outsiders. Ever.
-            </p>
+            {/* CTA Buttons */}
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link to="/auth">
+                <motion.button
+                  whileHover={{
+                    scale: 1.05,
+                    boxShadow: "0 20px 40px rgba(126, 34, 206, 0.3)",
+                  }}
+                  whileTap={{ scale: 0.95 }}
+                  className="inline-flex items-center justify-center bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold text-lg px-8 py-4 rounded-full shadow-xl transition-all duration-300"
+                >
+                  Get Started Free
+                  <svg
+                    className="ml-2 w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M13 7l5 5m0 0l-5 5m5-5H6"
+                    />
+                  </svg>
+                </motion.button>
+              </Link>
 
-            {/* CTA */}
-            <div className="mt-8">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center bg-purple-700 hover:bg-purple-900 text-white font-bold text-lg px-8 py-4 rounded-full shadow-lg transition-all duration-200"
                 onClick={() => {
-                  const emailInput = prompt(
-                    "Enter your FUTMINNA email to get early access:"
-                  );
-                  if (emailInput && emailInput.includes("@futminna.edu.ng")) {
-                    alert(
-                      `Welcome, ${
-                        emailInput.split("@")[0]
-                      }! You're in. Launch: Dec 2025.`
-                    );
-                  } else if (emailInput) {
-                    alert("Please use your valid FUTMINNA email.");
-                  }
+                  document
+                    .getElementById("why-choose-us")
+                    ?.scrollIntoView({ behavior: "smooth" });
                 }}
+                className="inline-flex items-center justify-center bg-white border-2 border-[#7E22CE] text-[#7E22CE] font-semibold text-lg px-8 py-4 rounded-full hover:bg-[#7E22CE]/5 transition-all duration-300"
               >
-                Get Early Access
-                <svg
-                  className="ml-2 w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
+                Learn More
               </motion.button>
             </div>
 
-            <p className="mt-3 text-xs text-gray-500">
-              Launching <span className="font-semibold">December 2025</span> —
-              Be the first.
-            </p>
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.8 }}
+              className="mt-6 text-sm text-[#4B5563] flex items-center justify-center md:justify-start gap-2"
+            >
+              <svg
+                className="w-5 h-5 text-[#14B8A6]"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              Free forever • No hidden fees • Verified students only
+            </motion.p>
           </motion.div>
 
           {/* Right: Phone Mockup */}
           <motion.div
-            initial={{ opacity: 0, x: 100 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, delay: 0.3 }}
+            initial={{ opacity: 0, scale: 0.8, y: 50 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
             className="relative flex justify-center md:justify-end"
           >
-            <div className="relative transform -rotate-12 hover:rotate-0 transition-transform duration-500">
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              className="relative"
+            >
               {/* Phone Frame */}
-              <div className="relative w-64 h-[520px] md:w-72 md:h-[580px] bg-black rounded-[3rem] shadow-2xl overflow-hidden border-8 border-black">
+              <div className="relative w-72 h-[600px] bg-[#111827] rounded-[3rem] shadow-2xl overflow-hidden border-[14px] border-[#111827]">
                 {/* Screen */}
-                <div className="absolute inset-0 bg-white rounded-[2.5rem] overflow-hidden p-4">
-                  {/* App Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-1">
-                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                      <span className="text-xs font-bold text-gray-800">
-                        MKET
+                <div className="absolute inset-0 bg-white rounded-[2rem] overflow-hidden">
+                  {/* Status Bar */}
+                  <div className="flex items-center justify-between px-6 py-3 bg-[#7E22CE]">
+                    <span className="text-xs font-bold text-white font-zen">
+                      MKET
+                    </span>
+                    <div className="text-xs text-white">9:41 AM</div>
+                  </div>
+
+                  {/* App Content */}
+                  <div className="p-4 space-y-4">
+                    {/* Search Bar */}
+                    <div className="bg-gray-100 rounded-full px-4 py-2.5 flex items-center gap-2">
+                      <svg
+                        className="w-4 h-4 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                      <span className="text-sm text-gray-400">
+                        Search products...
                       </span>
                     </div>
-                    <div className="text-xs text-gray-500">9:41 AM</div>
-                  </div>
 
-                  {/* Listing Card */}
-                  <div className="bg-gray-50 rounded-xl p-3 shadow-sm">
-                    <div className="flex space-x-3">
-                      <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16"></div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm">
-                          PHY 112 Textbook
-                        </h3>
-                        <p className="text-xs text-gray-600">
-                          Like New • Bosso Hostel
-                        </p>
-                        <p className="text-lg font-bold text-purple-700">
-                          ₦2,500
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Chat Bubble */}
-                  <div className="absolute bottom-20 left-6 bg-purple-600 text-white px-4 py-2 rounded-2xl rounded-bl-none shadow-lg max-w-[180px]">
-                    <p className="text-sm font-medium">
-                      Is this still available?
-                    </p>
-                    <p className="text-xs opacity-80">Just now</p>
-                  </div>
-
-                  {/* Input Bar */}
-                  <div className="absolute bottom-4 left-4 right-4 flex items-center bg-gray-100 rounded-full px-4 py-2">
-                    <input
-                      type="text"
-                      placeholder="Type a message..."
-                      className="flex-1 bg-transparent text-sm outline-none"
-                      disabled
-                    />
-                    <svg
-                      className="w-5 h-5 text-purple-600"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
+                    {/* Featured Product Card */}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.8 }}
+                      className="bg-gradient-to-br from-[#7E22CE]/10 to-[#14B8A6]/10 rounded-2xl p-4 shadow-lg"
                     >
-                      <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
-                    </svg>
+                      <div className="flex gap-3">
+                        <div className="w-20 h-20 bg-[#7E22CE]/20 rounded-xl flex items-center justify-center">
+                          <svg
+                            className="w-10 h-10 text-[#7E22CE]"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                            />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="font-bold text-sm text-[#111827]">
+                            Engineering Textbook
+                          </h3>
+                          <p className="text-xs text-[#4B5563]">
+                            Like New • Main Campus
+                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <span className="text-lg font-bold text-[#7E22CE]">
+                              ₦3,500
+                            </span>
+                            <span className="text-xs px-2 py-1 bg-[#14B8A6] text-white rounded-full">
+                              Available
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </motion.div>
+
+                    {/* Chat Preview */}
+                    <motion.div
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.2 }}
+                      className="bg-[#7E22CE] text-white px-4 py-3 rounded-2xl rounded-tl-none shadow-lg"
+                    >
+                      <p className="text-sm font-medium">
+                        Hey! Is this available?
+                      </p>
+                      <p className="text-xs opacity-80 mt-1">Just now</p>
+                    </motion.div>
+
+                    <motion.div
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 1.4 }}
+                      className="bg-gray-100 px-4 py-3 rounded-2xl rounded-tr-none shadow-lg ml-8"
+                    >
+                      <p className="text-sm font-medium text-[#111827]">
+                        Yes! Meet at library?
+                      </p>
+                      <p className="text-xs text-[#4B5563] mt-1">Just now</p>
+                    </motion.div>
                   </div>
                 </div>
               </div>
 
               {/* Glow Effect */}
-              <div className="absolute -inset-1 bg-purple-600 opacity-20 blur-3xl -z-10"></div>
-            </div>
+              <div className="absolute -inset-4 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] opacity-20 blur-3xl -z-10"></div>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -186,7 +255,7 @@ const Hero = () => {
         >
           <path
             d="M0 120L60 105C120 90 240 60 360 50C480 40 600 50 720 60C840 70 960 80 1080 75C1200 70 1320 50 1380 40L1440 30V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-            fill="white"
+            fill="#F3F4F6"
           />
         </svg>
       </div>
