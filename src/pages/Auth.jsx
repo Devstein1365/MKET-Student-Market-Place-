@@ -1,23 +1,16 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FaUser,
-  FaEnvelope,
-  FaLock,
-  FaEye,
-  FaEyeSlash,
-  FaIdCard,
-} from "react-icons/fa";
+import { FaUser, FaEnvelope, FaLock, FaIdCard } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import PasswordInput from "../components/shared/PasswordInput";
+import ConfirmPasswordInput from "../components/shared/ConfirmPasswordInput";
 
 const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, signup } = useAuth();
   const [activeTab, setActiveTab] = useState("login"); // 'login', 'signup', or 'forgot'
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -321,30 +314,15 @@ const Auth = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={loginData.password}
-                      onChange={handleLoginChange}
-                      required
-                      placeholder="Enter your password"
-                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all outline-none font-instrument"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#7E22CE] transition-colors"
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
+                <PasswordInput
+                  label="Password"
+                  name="password"
+                  value={loginData.password}
+                  onChange={handleLoginChange}
+                  placeholder="Enter your password"
+                  required
+                  showStrengthIndicator={false}
+                />
 
                 <div className="flex items-center justify-between">
                   <label className="flex items-center">
@@ -487,57 +465,25 @@ const Auth = () => {
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={signupData.password}
-                      onChange={handleSignupChange}
-                      required
-                      placeholder="Create a strong password"
-                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all outline-none font-instrument"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#7E22CE] transition-colors"
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
+                <PasswordInput
+                  label="Password"
+                  name="password"
+                  value={signupData.password}
+                  onChange={handleSignupChange}
+                  placeholder="Create a strong password"
+                  required
+                  showStrengthIndicator={true}
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
-                    Confirm Password
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmPassword"
-                      value={signupData.confirmPassword}
-                      onChange={handleSignupChange}
-                      required
-                      placeholder="Re-enter your password"
-                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all outline-none font-instrument"
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#7E22CE] transition-colors"
-                    >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
+                <ConfirmPasswordInput
+                  label="Confirm Password"
+                  name="confirmPassword"
+                  value={signupData.confirmPassword}
+                  onChange={handleSignupChange}
+                  originalPassword={signupData.password}
+                  placeholder="Re-enter your password"
+                  required
+                />
 
                 <div className="flex items-start">
                   <input
@@ -617,57 +563,25 @@ const Auth = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
-                    New Password
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="newPassword"
-                      value={forgotPasswordData.newPassword}
-                      onChange={handleForgotPasswordChange}
-                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
-                      placeholder="Enter new password (min. 6 characters)"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#111827] transition-colors"
-                    >
-                      {showPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
+                <PasswordInput
+                  label="New Password"
+                  name="newPassword"
+                  value={forgotPasswordData.newPassword}
+                  onChange={handleForgotPasswordChange}
+                  placeholder="Enter new password (min. 6 characters)"
+                  required
+                  showStrengthIndicator={true}
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
-                    Confirm New Password
-                  </label>
-                  <div className="relative">
-                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
-                    <input
-                      type={showConfirmPassword ? "text" : "password"}
-                      name="confirmNewPassword"
-                      value={forgotPasswordData.confirmNewPassword}
-                      onChange={handleForgotPasswordChange}
-                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
-                      placeholder="Re-enter new password"
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setShowConfirmPassword(!showConfirmPassword)
-                      }
-                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#111827] transition-colors"
-                    >
-                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
-                    </button>
-                  </div>
-                </div>
+                <ConfirmPasswordInput
+                  label="Confirm New Password"
+                  name="confirmNewPassword"
+                  value={forgotPasswordData.confirmNewPassword}
+                  onChange={handleForgotPasswordChange}
+                  originalPassword={forgotPasswordData.newPassword}
+                  placeholder="Re-enter new password"
+                  required
+                />
 
                 <motion.button
                   whileHover={{ scale: 1.02 }}

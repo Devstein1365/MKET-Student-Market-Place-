@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { FaLock, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  FaLock,
+  FaEye,
+  FaEyeSlash,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 import { checkPasswordMatch } from "../../utils/passwordStrength";
 
 const ConfirmPasswordInput = ({
