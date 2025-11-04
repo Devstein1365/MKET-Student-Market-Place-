@@ -21,6 +21,16 @@ import productsService, {
   categories as categoriesData,
 } from "../../services/productsService";
 
+// Fisher-Yates shuffle algorithm for randomizing array
+const shuffleArray = (array) => {
+  const shuffled = [...array]; // Create a copy to avoid mutating original
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]; // Swap elements
+  }
+  return shuffled;
+};
+
 const DashboardHome = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
@@ -42,8 +52,10 @@ const DashboardHome = () => {
       setLoading(true);
       try {
         const data = await productsService.getTrendingProducts(12);
-        setProducts(data);
-        setFilteredProducts(data);
+        // Shuffle products using Fisher-Yates algorithm for variety
+        const shuffledData = shuffleArray(data);
+        setProducts(shuffledData);
+        setFilteredProducts(shuffledData);
       } catch (error) {
         console.error("Error loading products:", error);
       } finally {
@@ -55,6 +67,17 @@ const DashboardHome = () => {
 
   // Handle search and filters
   useEffect(() => {
+    // Only run search/filter if user has actually searched or changed filters
+    // Don't run on initial mount with empty search
+    if (
+      !searchQuery &&
+      filters.category === "all" &&
+      filters.condition === "all" &&
+      filters.location === "all"
+    ) {
+      return; // Let the initial load handle showing products
+    }
+
     const applySearchAndFilters = async () => {
       try {
         const results = await productsService.searchProducts(
