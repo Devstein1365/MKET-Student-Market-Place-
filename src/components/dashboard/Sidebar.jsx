@@ -3,12 +3,10 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaHome,
-  FaSearch,
   FaHeart,
   FaComments,
   FaUser,
   FaCog,
-  FaSignOutAlt,
   FaBars,
   FaTimes,
 } from "react-icons/fa";
@@ -23,7 +21,6 @@ const Sidebar = () => {
 
   const menuItems = [
     { name: "Home", path: "/dashboard", icon: FaHome },
-    { name: "Search", path: "/dashboard/search", icon: FaSearch },
     { name: "Wishlist", path: "/dashboard/wishlist", icon: FaHeart },
     { name: "Messages", path: "/dashboard/chat", icon: FaComments },
     { name: "Profile", path: "/dashboard/profile", icon: FaUser },

@@ -1,7 +1,14 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaHome, FaHeart, FaPlus, FaComments, FaUser } from "react-icons/fa";
+import {
+  FaHome,
+  FaHeart,
+  FaPlus,
+  FaComments,
+  FaUser,
+  FaTh,
+} from "react-icons/fa";
 import { useWishlist } from "../../context/WishlistContext";
 
 const BottomNav = () => {
@@ -15,10 +22,9 @@ const BottomNav = () => {
       icon: FaHome,
     },
     {
-      name: "Wishlist",
-      path: "/dashboard/wishlist",
-      icon: FaHeart,
-      badge: wishlistCount,
+      name: "Categories",
+      path: "/dashboard/categories",
+      icon: FaTh,
     },
     {
       name: "Post",
@@ -27,9 +33,10 @@ const BottomNav = () => {
       isSpecial: true, // Center floating button
     },
     {
-      name: "Chat",
-      path: "/dashboard/chat",
-      icon: FaComments,
+      name: "Wishlist",
+      path: "/dashboard/wishlist",
+      icon: FaHeart,
+      badge: wishlistCount,
     },
     {
       name: "Profile",

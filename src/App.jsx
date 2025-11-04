@@ -13,6 +13,8 @@ import ProductDetails from "./pages/dashboard/ProductDetails";
 import Messages from "./pages/dashboard/Messages";
 import Profile from "./pages/dashboard/Profile";
 import Settings from "./pages/dashboard/Settings";
+import Categories from "./pages/dashboard/Categories";
+import CategoryProducts from "./pages/dashboard/CategoryProducts";
 
 const App = () => {
   return (
@@ -40,6 +42,11 @@ const App = () => {
               <Route path="chat" element={<Messages />} />
               <Route path="profile" element={<Profile />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="categories" element={<Categories />} />
+              <Route
+                path="categories/:categoryId"
+                element={<CategoryProducts />}
+              />
             </Route>
 
             {/* 404 */}

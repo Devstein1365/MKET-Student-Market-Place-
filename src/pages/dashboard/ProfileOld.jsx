@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaBox, FaEye, FaShoppingBag, FaCog } from "react-icons/fa";
+import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/shared/Button";
 import Card from "../../components/shared/Card";
 import ProfileHeader from "../../components/profile/ProfileHeader";
@@ -8,23 +9,25 @@ import ContactInfo from "../../components/profile/ContactInfo";
 import StatsCard from "../../components/profile/StatsCard";
 import ListingsTab from "../../components/profile/ListingsTab";
 import PerformanceStats from "../../components/profile/PerformanceStats";
+import ImageCropper from "../../components/shared/ImageCropper";
 import productsService from "../../services/productsService";
 
 const Profile = () => {
   const navigate = useNavigate();
+  const { user, updateUser } = useAuth();
   const [activeTab, setActiveTab] = useState("listings");
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isEditMode, setIsEditMode] = useState(false);
   const [profileData, setProfileData] = useState({
-    name: "Oligwu Michael",
-    email: "oligwu.m2203183@st.futminna.edu.ng",
-    phone: "+234 814 567 8901",
-    location: "Bosso Campus",
-    bio: "Engineering student | Tech enthusiast | Looking to buy and sell quality items on campus",
-    avatar: null,
-    verified: false,
-    joinedDate: "2024-09-15",
+    name: user?.name || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
+    location: user?.location || "Bosso Campus",
+    bio: user?.bio || "",
+    avatar: user?.avatar || null,
+    verified: user?.verified || false,
+    joinedDate: user?.joinedDate || new Date().toISOString(),
   });
 
   const [stats, setStats] = useState({
@@ -33,6 +36,9 @@ const Profile = () => {
     totalSold: 0,
     activeListings: 0,
   });
+
+  const [imageToCrop, setImageToCrop] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   useEffect(() => {
     loadMyListings();
@@ -64,15 +70,32 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileData({ ...profileData, avatar: reader.result });
+        setImageToCrop(reader.result);
+        setShowCropper(true);
       };
       reader.readAsDataURL(file);
     }
   };
 
+  const handleCropComplete = (croppedImage) => {
+    setProfileData({ ...profileData, avatar: croppedImage });
+    setShowCropper(false);
+    setImageToCrop(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setImageToCrop(null);
+  };
+
   const handleSaveProfile = () => {
-    setIsEditMode(false);
-    alert("Profile updated successfully!");
+    const result = updateUser(profileData);
+    if (result.success) {
+      setIsEditMode(false);
+      alert("Profile updated successfully!");
+    } else {
+      alert("Failed to update profile. Please try again.");
+    }
   };
 
   const formatDate = (dateString) => {
@@ -85,13 +108,32 @@ const Profile = () => {
   };
 
   const tabs = [
-    { id: "listings", label: "My Listings", icon: FaBox, count: stats.totalListings },
-    { id: "sold", label: "Sold Items", icon: FaShoppingBag, count: stats.totalSold },
+    {
+      id: "listings",
+      label: "My Listings",
+      icon: FaBox,
+      count: stats.totalListings,
+    },
+    {
+      id: "sold",
+      label: "Sold Items",
+      icon: FaShoppingBag,
+      count: stats.totalSold,
+    },
     { id: "stats", label: "Statistics", icon: FaEye, count: null },
   ];
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Image Cropper Modal */}
+      {showCropper && imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          onComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -120,7 +162,8 @@ const Profile = () => {
               <ProfileHeader
                 profileData={profileData}
                 isEditMode={isEditMode}
-                onEdit={() => setIsEditMode(true)}
+                onEdit={setProfileData}
+                onEditModeToggle={() => setIsEditMode(true)}
                 onSave={handleSaveProfile}
                 onCancel={() => setIsEditMode(false)}
                 onAvatarChange={handleAvatarChange}
@@ -158,17 +201,20 @@ const Profile = () => {
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 px-4 py-3 font-instrument font-semibold transition-colors ${
+                    className={`flex-1 px-2 sm:px-4 py-3 font-instrument font-semibold transition-colors text-xs sm:text-sm ${
                       activeTab === tab.id
                         ? "text-[#7E22CE] border-b-2 border-[#7E22CE]"
                         : "text-gray-600 hover:text-gray-900"
                     }`}
                   >
-                    <span className="flex items-center justify-center gap-2">
-                      <tab.icon />
-                      {tab.label}
+                    <span className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2">
+                      <tab.icon className="text-base sm:text-lg" />
+                      <span className="hidden sm:inline">{tab.label}</span>
+                      <span className="sm:hidden text-[10px]">
+                        {tab.label.split(" ")[0]}
+                      </span>
                       {tab.count !== null && (
-                        <span className="ml-1 px-2 py-0.5 bg-gray-100 rounded-full text-xs">
+                        <span className="px-1.5 sm:px-2 py-0.5 bg-gray-100 rounded-full text-[10px] sm:text-xs">
                           {tab.count}
                         </span>
                       )}
