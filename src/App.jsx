@@ -7,6 +7,7 @@ import DashboardLayout from "./pages/dashboard/DashboardLayout";
 import DashboardHome from "./pages/dashboard/DashboardHome";
 import Wishlist from "./pages/dashboard/Wishlist";
 import PostItem from "./pages/dashboard/PostItem";
+import ProductDetails from "./pages/dashboard/ProductDetails";
 
 const App = () => {
   return (
@@ -20,6 +21,7 @@ const App = () => {
           {/* Dashboard routes - nested */}
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
+            <Route path="product/:id" element={<ProductDetails />} />
             <Route path="wishlist" element={<Wishlist />} />
             <Route path="post" element={<PostItem />} />
             <Route

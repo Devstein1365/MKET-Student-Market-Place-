@@ -10,6 +10,12 @@ const mockProducts = [
     condition: "Used",
     category: "electronics",
     image: "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=400",
+    images: [
+      "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=800",
+      "https://images.unsplash.com/photo-1611791483458-af8143097bb0?w=800",
+      "https://images.unsplash.com/photo-1605787020600-b9ebd5df1d07?w=800",
+      "https://images.unsplash.com/photo-1592286927505-25f428ac3eb7?w=800",
+    ],
     location: "Bosso Campus",
     views: 142,
     description:
@@ -29,6 +35,11 @@ const mockProducts = [
     condition: "New",
     category: "electronics",
     image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
+    images: [
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=800",
+      "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=800",
+      "https://images.unsplash.com/photo-1541807084-5c52b6b3adef?w=800",
+    ],
     location: "Gidan Kwano",
     views: 289,
     description:
@@ -413,5 +424,10 @@ export const productsService = {
     });
   },
 };
+
+// Named exports for convenience
+export const getProductById = productsService.getProductById;
+export const getAllProducts = productsService.getAllProducts;
+export const searchProducts = productsService.searchProducts;
 
 export default productsService;

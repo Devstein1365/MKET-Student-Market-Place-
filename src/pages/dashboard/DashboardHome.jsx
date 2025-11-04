@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   FaSearch,
   FaFilter,
@@ -22,6 +22,7 @@ import productsService, {
 } from "../../services/productsService";
 
 const DashboardHome = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -300,7 +301,7 @@ const DashboardHome = () => {
                     <ProductCard
                       product={product}
                       onClick={() =>
-                        console.log("Product clicked:", product.id)
+                        navigate(`/dashboard/product/${product.id}`)
                       }
                     />
                   </motion.div>

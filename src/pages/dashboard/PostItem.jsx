@@ -8,14 +8,18 @@ import {
   FaTag,
   FaBox,
   FaDollarSign,
+  FaMagic,
+  FaSpinner,
 } from "react-icons/fa";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
 import { categories as categoriesData } from "../../services/productsService";
+import { generateProductDescription } from "../../services/geminiService";
 
 const PostItem = () => {
   const [images, setImages] = useState([]);
   const [dragActive, setDragActive] = useState(false);
+  const [tappedImageId, setTappedImageId] = useState(null); // For mobile tap to show remove button
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -26,6 +30,7 @@ const PostItem = () => {
     location: "",
   });
   const [errors, setErrors] = useState({});
+  const [isGenerating, setIsGenerating] = useState(false);
 
   // Handle image upload
   const handleImageUpload = (files) => {
@@ -82,6 +87,43 @@ const PostItem = () => {
     // Clear error when user types
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  // Generate AI description
+  const handleGenerateDescription = async () => {
+    // Validate required fields for AI generation
+    if (!formData.title.trim()) {
+      alert("Please enter a product title first!");
+      return;
+    }
+    if (!formData.category) {
+      alert("Please select a category first!");
+      return;
+    }
+    if (!formData.price || parseFloat(formData.price) <= 0) {
+      alert("Please enter a valid price first!");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const description = await generateProductDescription(formData);
+      setFormData((prev) => ({
+        ...prev,
+        description,
+      }));
+      // Clear any description error
+      if (errors.description) {
+        setErrors((prev) => ({ ...prev, description: "" }));
+      }
+    } catch (error) {
+      console.error("Error generating description:", error);
+      alert(
+        "Failed to generate description. Please try again or write it manually."
+      );
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -211,41 +253,54 @@ const PostItem = () => {
             </p>
           )}
 
-          {/* Image Preview Grid */}
+          {/* Image Preview - Horizontal Scroll */}
           {images.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mt-6">
-              <AnimatePresence>
-                {images.map((image, index) => (
-                  <motion.div
-                    key={image.id}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.8 }}
-                    className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 group"
-                  >
-                    <img
-                      src={image.preview}
-                      alt={`Preview ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                    {index === 0 && (
-                      <div className="absolute top-2 left-2 bg-[#7E22CE] text-white text-xs font-inter font-semibold px-2 py-1 rounded">
-                        Main
-                      </div>
-                    )}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        removeImage(image.id);
+            <div className="mt-6 overflow-x-auto">
+              <div className="flex gap-3 pb-2">
+                <AnimatePresence>
+                  {images.map((image, index) => (
+                    <motion.div
+                      key={image.id}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.8 }}
+                      className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden border-2 border-gray-200 group"
+                      onClick={() => {
+                        // Toggle tapped state for mobile - tap to show/hide remove button
+                        setTappedImageId(
+                          tappedImageId === image.id ? null : image.id
+                        );
                       }}
-                      className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                     >
-                      <FaTimes />
-                    </button>
-                  </motion.div>
-                ))}
-              </AnimatePresence>
+                      <img
+                        src={image.preview}
+                        alt={`Preview ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      {index === 0 && (
+                        <div className="absolute top-1 left-1 bg-[#7E22CE] text-white text-[10px] font-inter font-semibold px-1.5 py-0.5 rounded">
+                          Main
+                        </div>
+                      )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeImage(image.id);
+                          setTappedImageId(null); // Reset after removal
+                        }}
+                        className={`absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center transition-opacity ${
+                          tappedImageId === image.id
+                            ? "opacity-100"
+                            : "opacity-0 group-hover:opacity-100"
+                        }`}
+                      >
+                        <FaTimes className="text-xs" />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
             </div>
           )}
         </div>
@@ -272,19 +327,52 @@ const PostItem = () => {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-inter font-medium text-[#111827] mb-2">
-              Description <span className="text-red-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-inter font-medium text-[#111827]">
+                Description <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={handleGenerateDescription}
+                disabled={
+                  isGenerating ||
+                  !formData.title.trim() ||
+                  !formData.category ||
+                  !formData.price
+                }
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white text-sm font-inter font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isGenerating ? (
+                  <>
+                    <FaSpinner className="animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <FaMagic />
+                    AI Generate
+                  </>
+                )}
+              </button>
+            </div>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              placeholder="Describe your product in detail..."
+              placeholder="Describe your product in detail... or use AI to generate"
               rows={4}
-              className={`w-full px-4 py-3 border rounded-lg font-instrument text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all ${
+              disabled={isGenerating}
+              className={`w-full px-4 py-3 border rounded-lg font-instrument text-[#111827] placeholder:text-[#9CA3AF] focus:outline-none focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all disabled:bg-gray-50 disabled:cursor-not-allowed ${
                 errors.description ? "border-red-500" : "border-gray-300"
               }`}
             />
+            {(!formData.title.trim() ||
+              !formData.category ||
+              !formData.price) && (
+              <p className="text-[#6B7280] text-xs mt-1 font-instrument">
+                💡 Fill in Title, Category, and Price first to use AI generation
+              </p>
+            )}
             {errors.description && (
               <p className="text-red-500 text-sm mt-1 font-instrument">
                 {errors.description}

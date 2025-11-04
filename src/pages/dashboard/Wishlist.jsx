@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaHome, FaShoppingBag, FaTrash } from "react-icons/fa";
 import { useWishlist } from "../../context/WishlistContext";
@@ -7,6 +7,7 @@ import ProductCard from "../../components/dashboard/ProductCard";
 import Button from "../../components/shared/Button";
 
 const Wishlist = () => {
+  const navigate = useNavigate();
   const { wishlistItems, removeFromWishlist, clearWishlist, wishlistCount } =
     useWishlist();
 
@@ -97,9 +98,7 @@ const Wishlist = () => {
                 >
                   <ProductCard
                     product={product}
-                    onClick={() =>
-                      console.log("Navigate to product:", product.id)
-                    }
+                    onClick={() => navigate(`/dashboard/product/${product.id}`)}
                   />
                 </motion.div>
               ))}

@@ -1,0 +1,392 @@
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  FaHeart,
+  FaRegHeart,
+  FaMapMarkerAlt,
+  FaEye,
+  FaChevronLeft,
+  FaChevronRight,
+  FaShare,
+  FaFlag,
+  FaCheckCircle,
+  FaClock,
+} from "react-icons/fa";
+import { useWishlist } from "../../context/WishlistContext";
+import Button from "../../components/shared/Button";
+import Card from "../../components/shared/Card";
+import Avatar from "../../components/shared/Avatar";
+import Badge from "../../components/shared/Badge";
+import { getProductById } from "../../services/productsService";
+
+const ProductDetails = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+
+  const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      try {
+        const data = await getProductById(parseInt(id));
+        setProduct(data);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [id]);
+
+  const handlePrevImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === 0 ? (product.images?.length || 1) - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = (e) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) =>
+      prev === (product.images?.length || 1) - 1 ? 0 : prev + 1
+    );
+  };
+
+  const handleWishlistToggle = () => {
+    if (product) {
+      toggleWishlist(product);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Yesterday";
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    return date.toLocaleDateString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#7E22CE]"></div>
+      </div>
+    );
+  }
+
+  if (!product) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-xl text-gray-600 font-instrument">
+          Product not found
+        </p>
+        <Button onClick={() => navigate("/dashboard")}>
+          Back to Dashboard
+        </Button>
+      </div>
+    );
+  }
+
+  const images = product.images || [product.image];
+  const isWishlisted = isInWishlist(product.id);
+  const discount = product.originalPrice
+    ? Math.round(
+        ((product.originalPrice - product.price) / product.originalPrice) * 100
+      )
+    : 0;
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      {/* Header */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => navigate(-1)}
+              className="flex items-center gap-2 text-gray-600 hover:text-[#7E22CE] transition-colors"
+            >
+              <FaChevronLeft />
+              <span className="font-instrument">Back</span>
+            </button>
+            <div className="flex items-center gap-3">
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                <FaShare className="text-gray-600" />
+              </motion.button>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={handleWishlistToggle}
+                className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
+              >
+                {isWishlisted ? (
+                  <FaHeart className="text-red-500 text-xl" />
+                ) : (
+                  <FaRegHeart className="text-gray-600 text-xl" />
+                )}
+              </motion.button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column - Images */}
+          <div className="space-y-4">
+            {/* Main Image */}
+            <Card padding="none" className="overflow-hidden">
+              <div className="relative aspect-square bg-gray-100">
+                <motion.img
+                  key={currentImageIndex}
+                  src={images[currentImageIndex]}
+                  alt={`${product.title} - Image ${currentImageIndex + 1}`}
+                  className="w-full h-full object-cover cursor-zoom-in"
+                  onClick={() => setIsImageModalOpen(true)}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.3 }}
+                />
+
+                {/* Image Navigation Arrows */}
+                {images.length > 1 && (
+                  <>
+                    <button
+                      onClick={handlePrevImage}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                    >
+                      <FaChevronLeft className="text-gray-800" />
+                    </button>
+                    <button
+                      onClick={handleNextImage}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-lg hover:bg-white transition-colors"
+                    >
+                      <FaChevronRight className="text-gray-800" />
+                    </button>
+                  </>
+                )}
+
+                {/* Image Counter */}
+                {images.length > 1 && (
+                  <div className="absolute bottom-4 right-4 bg-black/60 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-instrument">
+                    {currentImageIndex + 1} / {images.length}
+                  </div>
+                )}
+
+                {/* Badges */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  {product.condition && (
+                    <Badge
+                      variant={
+                        product.condition === "New"
+                          ? "success"
+                          : product.condition === "Fairly Used"
+                          ? "warning"
+                          : "info"
+                      }
+                    >
+                      {product.condition}
+                    </Badge>
+                  )}
+                  {discount > 0 && <Badge variant="error">-{discount}%</Badge>}
+                </div>
+              </div>
+            </Card>
+
+            {/* Thumbnail Gallery */}
+            {images.length > 1 && (
+              <div className="overflow-x-auto">
+                <div className="flex gap-2 pb-2">
+                  {images.map((image, index) => (
+                    <motion.button
+                      key={index}
+                      onClick={() => setCurrentImageIndex(index)}
+                      whileTap={{ scale: 0.95 }}
+                      className={`shrink-0 w-20 h-20 rounded-lg overflow-hidden border-2 transition-all ${
+                        index === currentImageIndex
+                          ? "border-[#7E22CE] ring-2 ring-[#7E22CE]/20"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <img
+                        src={image}
+                        alt={`Thumbnail ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </motion.button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column - Product Info */}
+          <div className="space-y-6">
+            {/* Title and Price */}
+            <Card>
+              <div className="space-y-4">
+                <h1 className="text-2xl sm:text-3xl font-inter font-bold text-gray-900">
+                  {product.title}
+                </h1>
+
+                {/* Price Section */}
+                <div className="flex items-baseline gap-3 flex-wrap">
+                  <span className="text-3xl sm:text-4xl font-inter font-bold text-[#7E22CE]">
+                    ₦{parseInt(product.price).toLocaleString()}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="text-xl text-gray-400 line-through font-instrument">
+                      ₦{parseInt(product.originalPrice).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                {/* Meta Info */}
+                <div className="flex items-center gap-4 text-sm text-gray-600 font-instrument">
+                  <div className="flex items-center gap-1">
+                    <FaMapMarkerAlt className="text-[#14B8A6]" />
+                    <span>{product.location}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FaEye />
+                    <span>{product.views} views</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <FaClock />
+                    <span>{formatDate(product.createdAt)}</span>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Seller Info */}
+            <Card>
+              <h3 className="text-lg font-inter font-semibold text-gray-900 mb-4">
+                Seller Information
+              </h3>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar
+                    src={product.seller.avatar}
+                    alt={product.seller.name}
+                    size="lg"
+                  />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-instrument font-semibold text-gray-900">
+                        {product.seller.name}
+                      </h4>
+                      {product.seller.verified && (
+                        <FaCheckCircle className="text-[#14B8A6] text-sm" />
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-600 font-instrument">
+                      Member since 2024
+                    </p>
+                  </div>
+                </div>
+                <Button variant="outline" size="sm">
+                  View Profile
+                </Button>
+              </div>
+            </Card>
+
+            {/* Description */}
+            <Card>
+              <h3 className="text-lg font-inter font-semibold text-gray-900 mb-3">
+                Description
+              </h3>
+              <p className="text-gray-700 font-instrument leading-relaxed whitespace-pre-line">
+                {product.description}
+              </p>
+            </Card>
+
+            {/* Action Buttons */}
+            <Card>
+              <div className="space-y-3">
+                <Button fullWidth size="lg" className="text-lg">
+                  Chat with Seller
+                </Button>
+                <div className="grid grid-cols-2 gap-3">
+                  <Button variant="outline" fullWidth>
+                    <FaFlag className="mr-2" />
+                    Report
+                  </Button>
+                  <Button variant="outline" fullWidth>
+                    <FaShare className="mr-2" />
+                    Share
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+
+      {/* Image Modal - Full Screen View */}
+      <AnimatePresence>
+        {isImageModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
+            onClick={() => setIsImageModalOpen(false)}
+          >
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+            >
+              ×
+            </button>
+            <motion.img
+              key={currentImageIndex}
+              src={images[currentImageIndex]}
+              alt={product.title}
+              className="max-w-full max-h-full object-contain"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              transition={{ duration: 0.2 }}
+            />
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={handlePrevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                >
+                  <FaChevronLeft className="text-xl" />
+                </button>
+                <button
+                  onClick={handleNextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/20 transition-colors"
+                >
+                  <FaChevronRight className="text-xl" />
+                </button>
+              </>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+export default ProductDetails;
