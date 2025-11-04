@@ -181,6 +181,43 @@ class AuthService {
     return localStorage.getItem(AUTH_TOKEN_KEY);
   }
 
+  // Check if email exists
+  emailExists(email) {
+    const users = this.getAllUsers();
+    return users.some((user) => user.email === email);
+  }
+
+  // Reset password (for localStorage implementation)
+  resetPassword(email, newPassword) {
+    try {
+      const users = this.getAllUsers();
+      const userIndex = users.findIndex((u) => u.email === email);
+
+      if (userIndex === -1) {
+        return {
+          success: false,
+          message: "Email not found in our records",
+        };
+      }
+
+      // Update password
+      users[userIndex].password = newPassword; // In production, hash this!
+      this.saveUsers(users);
+
+      return {
+        success: true,
+        message:
+          "Password reset successfully! You can now login with your new password.",
+      };
+    } catch (error) {
+      console.error("Error resetting password:", error);
+      return {
+        success: false,
+        message: "Failed to reset password. Please try again.",
+      };
+    }
+  }
+
   // Clear all auth data (for testing)
   clearAllData() {
     localStorage.removeItem(USERS_KEY);

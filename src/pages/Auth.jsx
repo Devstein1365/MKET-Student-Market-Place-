@@ -15,11 +15,12 @@ const Auth = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, signup } = useAuth();
-  const [activeTab, setActiveTab] = useState("login"); // 'login' or 'signup'
+  const [activeTab, setActiveTab] = useState("login"); // 'login', 'signup', or 'forgot'
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   // Login state
   const [loginData, setLoginData] = useState({
@@ -35,6 +36,13 @@ const Auth = () => {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+
+  // Forgot password state
+  const [forgotPasswordData, setForgotPasswordData] = useState({
+    email: "",
+    newPassword: "",
+    confirmNewPassword: "",
   });
 
   // Handle login input
@@ -135,6 +143,86 @@ const Auth = () => {
     }
   };
 
+  // Handle forgot password input
+  const handleForgotPasswordChange = (e) => {
+    setForgotPasswordData({
+      ...forgotPasswordData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  // Handle forgot password submit
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    // Validation
+    if (!forgotPasswordData.email) {
+      setError("Please enter your email address");
+      return;
+    }
+
+    if (!forgotPasswordData.email.includes("@st.futminna.edu.ng")) {
+      setError("Please use your FUTMINNA student email!");
+      return;
+    }
+
+    if (forgotPasswordData.newPassword.length < 6) {
+      setError("Password must be at least 6 characters long!");
+      return;
+    }
+
+    if (
+      forgotPasswordData.newPassword !== forgotPasswordData.confirmNewPassword
+    ) {
+      setError("Passwords do not match!");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Import authService
+      const authService = (await import("../services/authService")).default;
+
+      // Check if email exists
+      if (!authService.emailExists(forgotPasswordData.email)) {
+        setError("Email not found. Please check your email or sign up.");
+        setLoading(false);
+        return;
+      }
+
+      // Reset password
+      const result = authService.resetPassword(
+        forgotPasswordData.email,
+        forgotPasswordData.newPassword
+      );
+
+      if (result.success) {
+        setSuccess(result.message);
+        setError("");
+        // Clear form
+        setForgotPasswordData({
+          email: "",
+          newPassword: "",
+          confirmNewPassword: "",
+        });
+        // Switch back to login after 2 seconds
+        setTimeout(() => {
+          setActiveTab("login");
+          setSuccess("");
+        }, 2000);
+      } else {
+        setError(result.message);
+      }
+    } catch (err) {
+      setError("An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-linear-to-br from-[#7E22CE]/10 via-white to-[#14B8A6]/10 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <motion.div
@@ -188,6 +276,19 @@ const Auth = () => {
               className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg"
             >
               <p className="text-red-600 text-sm font-instrument">{error}</p>
+            </motion.div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg"
+            >
+              <p className="text-green-600 text-sm font-instrument">
+                {success}
+              </p>
             </motion.div>
           )}
 
@@ -279,8 +380,22 @@ const Auth = () => {
                     "Log In"
                   )}
                 </motion.button>
+
+                {/* Forgot Password Link */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("forgot");
+                      setError("");
+                    }}
+                    className="text-sm text-[#7E22CE] hover:text-[#6B1FB8] font-instrument font-medium transition-colors"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
               </motion.form>
-            ) : (
+            ) : activeTab === "signup" ? (
               <motion.form
                 key="signup"
                 initial={{ opacity: 0, x: 20 }}
@@ -465,35 +580,158 @@ const Auth = () => {
                   )}
                 </motion.button>
               </motion.form>
+            ) : (
+              <motion.form
+                key="forgot"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                onSubmit={handleForgotPasswordSubmit}
+                className="space-y-6"
+              >
+                <div className="text-center mb-4">
+                  <h3 className="text-lg font-inter font-bold text-gray-900">
+                    Reset Password
+                  </h3>
+                  <p className="text-sm text-gray-600 font-instrument mt-1">
+                    Enter your email and new password
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
+                    Email Address
+                  </label>
+                  <div className="relative">
+                    <FaEnvelope className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
+                    <input
+                      type="email"
+                      name="email"
+                      value={forgotPasswordData.email}
+                      onChange={handleForgotPasswordChange}
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
+                      placeholder="your.email@st.futminna.edu.ng"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
+                    New Password
+                  </label>
+                  <div className="relative">
+                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      name="newPassword"
+                      value={forgotPasswordData.newPassword}
+                      onChange={handleForgotPasswordChange}
+                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
+                      placeholder="Enter new password (min. 6 characters)"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#111827] transition-colors"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
+                    Confirm New Password
+                  </label>
+                  <div className="relative">
+                    <FaLock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
+                    <input
+                      type={showConfirmPassword ? "text" : "password"}
+                      name="confirmNewPassword"
+                      value={forgotPasswordData.confirmNewPassword}
+                      onChange={handleForgotPasswordChange}
+                      className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
+                      placeholder="Re-enter new password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setShowConfirmPassword(!showConfirmPassword)
+                      }
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#4B5563] hover:text-[#111827] transition-colors"
+                    >
+                      {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+                    </button>
+                  </div>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={loading}
+                  className="w-full py-3 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white font-bold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 font-inter disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+                      Resetting Password...
+                    </>
+                  ) : (
+                    "Reset Password"
+                  )}
+                </motion.button>
+
+                {/* Back to Login */}
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("login");
+                      setError("");
+                      setSuccess("");
+                    }}
+                    className="text-sm text-[#7E22CE] hover:text-[#6B1FB8] font-instrument font-medium transition-colors"
+                  >
+                    ← Back to Login
+                  </button>
+                </div>
+              </motion.form>
             )}
           </AnimatePresence>
 
           {/* Additional Info */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-[#4B5563] font-instrument">
-              {activeTab === "login" ? (
-                <>
-                  Don't have an account?{" "}
-                  <button
-                    onClick={() => setActiveTab("signup")}
-                    className="text-[#7E22CE] hover:text-[#14B8A6] font-semibold"
-                  >
-                    Sign up now
-                  </button>
-                </>
-              ) : (
-                <>
-                  Already have an account?{" "}
-                  <button
-                    onClick={() => setActiveTab("login")}
-                    className="text-[#7E22CE] hover:text-[#14B8A6] font-semibold"
-                  >
-                    Log in here
-                  </button>
-                </>
-              )}
-            </p>
-          </div>
+          {activeTab !== "forgot" && (
+            <div className="mt-6 text-center">
+              <p className="text-sm text-[#4B5563] font-instrument">
+                {activeTab === "login" ? (
+                  <>
+                    Don't have an account?{" "}
+                    <button
+                      onClick={() => setActiveTab("signup")}
+                      className="text-[#7E22CE] hover:text-[#14B8A6] font-semibold"
+                    >
+                      Sign up now
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    Already have an account?{" "}
+                    <button
+                      onClick={() => setActiveTab("login")}
+                      className="text-[#7E22CE] hover:text-[#14B8A6] font-semibold"
+                    >
+                      Log in here
+                    </button>
+                  </>
+                )}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Back to Home */}
