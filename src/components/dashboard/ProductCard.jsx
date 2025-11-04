@@ -23,45 +23,47 @@ const ProductCard = ({ product, onClick }) => {
       onClick={onClick}
     >
       {/* Product image */}
-      <div className="relative aspect-square overflow-hidden bg-gray-100">
-        <img
-          src={product.image || "https://via.placeholder.com/400"}
-          alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-        />
+      <div className="p-2">
+        <div className="relative aspect-square overflow-hidden bg-gray-100 rounded-lg">
+          <img
+            src={product.image || "https://via.placeholder.com/400"}
+            alt={product.title}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+          />
 
-        {/* Wishlist button */}
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={handleWishlistToggle}
-          className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:shadow-lg transition-all z-10"
-        >
-          {isWishlisted ? (
-            <FaHeart className="text-red-500 text-lg" />
-          ) : (
-            <FaRegHeart className="text-[#4B5563] text-lg" />
+          {/* Wishlist button */}
+          <motion.button
+            whileTap={{ scale: 0.9 }}
+            onClick={handleWishlistToggle}
+            className="absolute top-2 right-2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-md hover:shadow-lg transition-all z-10"
+          >
+            {isWishlisted ? (
+              <FaHeart className="text-red-500 text-lg" />
+            ) : (
+              <FaRegHeart className="text-[#4B5563] text-lg" />
+            )}
+          </motion.button>
+
+          {/* Condition badge */}
+          {product.condition && (
+            <div className="absolute top-2 left-2">
+              <Badge
+                variant={product.condition === "New" ? "success" : "warning"}
+                size="sm"
+                rounded
+              >
+                {product.condition}
+              </Badge>
+            </div>
           )}
-        </motion.button>
 
-        {/* Condition badge */}
-        {product.condition && (
-          <div className="absolute top-2 left-2">
-            <Badge
-              variant={product.condition === "New" ? "success" : "warning"}
-              size="sm"
-              rounded
-            >
-              {product.condition}
-            </Badge>
-          </div>
-        )}
-
-        {/* Quick view overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
-            <div className="flex items-center gap-1 text-white text-sm">
-              <FaEye />
-              <span className="font-instrument">{product.views || 0}</span>
+          {/* Quick view overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between">
+              <div className="flex items-center gap-1 text-white text-sm">
+                <FaEye />
+                <span className="font-instrument">{product.views || 0}</span>
+              </div>
             </div>
           </div>
         </div>
