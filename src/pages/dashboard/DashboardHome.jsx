@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 import {
   FaSearch,
@@ -8,116 +8,119 @@ import {
   FaBell,
   FaFire,
   FaTags,
+  FaTimes,
+  FaSlidersH,
+  FaMapMarkerAlt,
+  FaSortAmountDown,
 } from "react-icons/fa";
 import ProductCard from "../../components/dashboard/ProductCard";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
 import Badge from "../../components/shared/Badge";
+import productsService, {
+  categories as categoriesData,
+} from "../../services/productsService";
 
 const DashboardHome = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
+  const [showDesktopFilters, setShowDesktopFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    category: "all",
+    condition: "all",
+    priceRange: [0, 1000000],
+    location: "all",
+    sortBy: "relevance",
+  });
 
-  // Mock data - will be replaced with API calls
-  const categories = [
-    { id: 1, name: "Electronics", icon: "📱", count: 245 },
-    { id: 2, name: "Books", icon: "📚", count: 189 },
-    { id: 3, name: "Fashion", icon: "👕", count: 312 },
-    { id: 4, name: "Furniture", icon: "🛋️", count: 78 },
-    { id: 5, name: "Sports", icon: "⚽", count: 156 },
+  // Load products on mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await productsService.getTrendingProducts(12);
+        setProducts(data);
+        setFilteredProducts(data);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
+
+  // Handle search and filters
+  useEffect(() => {
+    const applySearchAndFilters = async () => {
+      try {
+        const results = await productsService.searchProducts(
+          searchQuery,
+          filters
+        );
+        setFilteredProducts(results);
+      } catch (error) {
+        console.error("Error filtering products:", error);
+      }
+    };
+
+    // Debounce search
+    const timeoutId = setTimeout(() => {
+      applySearchAndFilters();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, filters]);
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [filterName]: value,
+    }));
+  };
+
+  const clearAllFilters = () => {
+    setFilters({
+      category: "all",
+      condition: "all",
+      priceRange: [0, 1000000],
+      location: "all",
+      sortBy: "relevance",
+    });
+    setSearchQuery("");
+  };
+
+  const activeFiltersCount = Object.values(filters).filter(
+    (value) =>
+      value !== "all" && value !== "relevance" && value !== filters.priceRange
+  ).length;
+
+  // Filter options data
+  const conditions = [
+    { id: "all", name: "All Conditions" },
+    { id: "new", name: "Brand New" },
+    { id: "used", name: "Used - Like New" },
+    { id: "fairly-used", name: "Fairly Used" },
   ];
 
-  const products = [
-    {
-      id: 1,
-      title: "iPhone 13 Pro Max 256GB - Excellent Condition",
-      price: 450000,
-      originalPrice: 520000,
-      condition: "Used",
-      image:
-        "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=400",
-      location: "Bosso Campus",
-      views: 142,
-      seller: {
-        name: "Aisha Mohammed",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 2,
-      title: "MacBook Pro 2021 M1 Chip - Like New",
-      price: 780000,
-      condition: "New",
-      image:
-        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-      location: "Gidan Kwano",
-      views: 289,
-      seller: {
-        name: "Chukwudi Okafor",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 3,
-      title: "Engineering Mathematics Textbook Set",
-      price: 15000,
-      condition: "Used",
-      image: "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=400",
-      location: "Main Campus",
-      views: 67,
-      seller: {
-        name: "Fatima Yusuf",
-        avatar: null,
-        verified: false,
-      },
-    },
-    {
-      id: 4,
-      title: "Gaming Laptop - ASUS ROG Strix G15",
-      price: 650000,
-      originalPrice: 750000,
-      condition: "Used",
-      image:
-        "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400",
-      location: "Bosso Campus",
-      views: 198,
-      seller: {
-        name: "Ibrahim Usman",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 5,
-      title: "Study Desk with Chair - Wooden",
-      price: 25000,
-      condition: "Used",
-      image:
-        "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=400",
-      location: "Gidan Kwano",
-      views: 45,
-      seller: {
-        name: "Grace Nwankwo",
-        avatar: null,
-        verified: false,
-      },
-    },
-    {
-      id: 6,
-      title: "Samsung Galaxy S23 Ultra 512GB",
-      price: 520000,
-      condition: "New",
-      image:
-        "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
-      location: "Main Campus",
-      views: 321,
-      seller: {
-        name: "Daniel Adeyemi",
-        avatar: null,
-        verified: true,
-      },
-    },
+  const locations = [
+    { id: "all", name: "All Locations" },
+    { id: "bosso", name: "Bosso Campus" },
+    { id: "main", name: "Main Campus" },
+    { id: "gidan-kwano", name: "Gidan Kwano" },
+    { id: "tunga", name: "Tunga" },
+    { id: "maitumbi", name: "Maitumbi" },
+  ];
+
+  const sortOptions = [
+    { id: "relevance", name: "Most Relevant" },
+    { id: "newest", name: "Newest First" },
+    { id: "price-low", name: "Price: Low to High" },
+    { id: "price-high", name: "Price: High to Low" },
+    { id: "popular", name: "Most Popular" },
   ];
 
   const containerVariants = {
@@ -222,7 +225,7 @@ const DashboardHome = () => {
             variants={containerVariants}
             className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
           >
-            {categories.map((category) => (
+            {categoriesData.slice(1, 6).map((category) => (
               <motion.div
                 key={category.id}
                 variants={itemVariants}
@@ -259,28 +262,57 @@ const DashboardHome = () => {
             </button>
           </div>
 
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={containerVariants}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-          >
-            {products.map((product) => (
-              <motion.div key={product.id} variants={itemVariants}>
-                <ProductCard
-                  product={product}
-                  onClick={() => console.log("Product clicked:", product.id)}
-                />
+          {loading ? (
+            <div className="flex items-center justify-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#7E22CE]"></div>
+            </div>
+          ) : filteredProducts.length > 0 ? (
+            <>
+              <motion.div
+                initial="hidden"
+                animate="visible"
+                variants={containerVariants}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+              >
+                {filteredProducts.map((product) => (
+                  <motion.div key={product.id} variants={itemVariants}>
+                    <ProductCard
+                      product={product}
+                      onClick={() =>
+                        console.log("Product clicked:", product.id)
+                      }
+                    />
+                  </motion.div>
+                ))}
               </motion.div>
-            ))}
-          </motion.div>
 
-          {/* Load more */}
-          <div className="flex justify-center mt-8">
-            <Button variant="outline" size="lg">
-              Load More Products
-            </Button>
-          </div>
+              {/* Load more */}
+              {filteredProducts.length >= 12 && (
+                <div className="flex justify-center mt-8">
+                  <Button variant="outline" size="lg">
+                    Load More Products
+                  </Button>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <FaSearch className="text-4xl text-[#4B5563]" />
+              </div>
+              <h3 className="text-xl font-inter font-bold text-[#111827] mb-2">
+                No products found
+              </h3>
+              <p className="text-[#4B5563] font-instrument mb-4 max-w-md">
+                {searchQuery
+                  ? `No results for "${searchQuery}". Try different keywords.`
+                  : "Try adjusting your filters to see more products."}
+              </p>
+              <Button variant="outline" onClick={clearAllFilters}>
+                Clear Filters
+              </Button>
+            </div>
+          )}
         </section>
       </div>
     </div>

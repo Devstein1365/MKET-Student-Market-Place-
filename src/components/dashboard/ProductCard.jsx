@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 import { FaHeart, FaRegHeart, FaMapMarkerAlt, FaEye } from "react-icons/fa";
+import { useWishlist } from "../../context/WishlistContext";
 import Card from "../shared/Card";
 import Avatar from "../shared/Avatar";
 import Badge from "../shared/Badge";
 
 const ProductCard = ({ product, onClick }) => {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
 
   const handleWishlistToggle = (e) => {
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    toggleWishlist(product);
   };
 
   return (

@@ -1,10 +1,12 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaHome, FaSearch, FaPlus, FaComments, FaUser } from "react-icons/fa";
+import { FaHome, FaHeart, FaPlus, FaComments, FaUser } from "react-icons/fa";
+import { useWishlist } from "../../context/WishlistContext";
 
 const BottomNav = () => {
   const location = useLocation();
+  const { wishlistCount } = useWishlist();
 
   const navItems = [
     {
@@ -13,9 +15,10 @@ const BottomNav = () => {
       icon: FaHome,
     },
     {
-      name: "Search",
-      path: "/dashboard/search",
-      icon: FaSearch,
+      name: "Wishlist",
+      path: "/dashboard/wishlist",
+      icon: FaHeart,
+      badge: wishlistCount,
     },
     {
       name: "Post",
@@ -84,13 +87,14 @@ const BottomNav = () => {
                 />
               )}
 
-              {/* Icon */}
+              {/* Icon with badge */}
               <motion.div
                 animate={{
                   scale: active ? 1.1 : 1,
                   y: active ? -2 : 0,
                 }}
                 transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                className="relative"
               >
                 <Icon
                   className={`text-xl transition-colors ${
@@ -99,6 +103,12 @@ const BottomNav = () => {
                       : "text-[#4B5563] group-hover:text-[#7E22CE]"
                   }`}
                 />
+                {/* Badge count */}
+                {item.badge > 0 && (
+                  <span className="absolute -top-1 -right-2 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                    {item.badge > 9 ? "9+" : item.badge}
+                  </span>
+                )}
               </motion.div>
 
               {/* Label */}
