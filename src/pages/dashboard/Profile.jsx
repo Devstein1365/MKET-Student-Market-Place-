@@ -9,6 +9,7 @@ import ContactInfo from "../../components/profile/ContactInfo";
 import StatsCard from "../../components/profile/StatsCard";
 import ListingsTab from "../../components/profile/ListingsTab";
 import PerformanceStats from "../../components/profile/PerformanceStats";
+import ImageCropper from "../../components/shared/ImageCropper";
 import productsService from "../../services/productsService";
 
 const Profile = () => {
@@ -35,6 +36,9 @@ const Profile = () => {
     totalSold: 0,
     activeListings: 0,
   });
+
+  const [imageToCrop, setImageToCrop] = useState(null);
+  const [showCropper, setShowCropper] = useState(false);
 
   useEffect(() => {
     loadMyListings();
@@ -66,10 +70,22 @@ const Profile = () => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileData({ ...profileData, avatar: reader.result });
+        setImageToCrop(reader.result);
+        setShowCropper(true);
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleCropComplete = (croppedImage) => {
+    setProfileData({ ...profileData, avatar: croppedImage });
+    setShowCropper(false);
+    setImageToCrop(null);
+  };
+
+  const handleCropCancel = () => {
+    setShowCropper(false);
+    setImageToCrop(null);
   };
 
   const handleSaveProfile = () => {
@@ -109,6 +125,15 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Image Cropper Modal */}
+      {showCropper && imageToCrop && (
+        <ImageCropper
+          image={imageToCrop}
+          onComplete={handleCropComplete}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       {/* Header */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -137,7 +162,8 @@ const Profile = () => {
               <ProfileHeader
                 profileData={profileData}
                 isEditMode={isEditMode}
-                onEdit={() => setIsEditMode(true)}
+                onEdit={setProfileData}
+                onEditModeToggle={() => setIsEditMode(true)}
                 onSave={handleSaveProfile}
                 onCancel={() => setIsEditMode(false)}
                 onAvatarChange={handleAvatarChange}

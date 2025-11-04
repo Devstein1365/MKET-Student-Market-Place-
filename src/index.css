@@ -3,3 +3,29 @@
 body {
   font-family: "Instrument Sans", sans-serif;
 }
+
+/* Image Cropper Slider Styling */
+input[type="range"].slider {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+input[type="range"].slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  background: #14b8a6;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+}
+
+input[type="range"].slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  background: #14b8a6;
+  cursor: pointer;
+  border-radius: 50%;
+  border: 2px solid white;
+}

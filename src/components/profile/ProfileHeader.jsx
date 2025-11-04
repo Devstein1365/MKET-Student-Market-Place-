@@ -8,6 +8,7 @@ const ProfileHeader = ({
   profileData,
   isEditMode,
   onEdit,
+  onEditModeToggle,
   onSave,
   onCancel,
   onAvatarChange,
@@ -91,7 +92,7 @@ const ProfileHeader = ({
             variant="outline"
             size="sm"
             icon={<FaEdit />}
-            onClick={onEdit}
+            onClick={onEditModeToggle}
           >
             Edit Profile
           </Button>
