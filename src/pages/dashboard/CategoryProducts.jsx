@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import {
   FaArrowLeft,
@@ -6,7 +6,6 @@ import {
   FaSortAmountDown,
   FaThLarge,
   FaList,
-  FaSpinner,
 } from "react-icons/fa";
 import { getCategoryById } from "../../data/categories";
 import productsService from "../../services/productsService";
@@ -19,9 +18,7 @@ const CategoryProducts = () => {
   const category = getCategoryById(categoryId);
 
   const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState("grid"); // 'grid' or 'list'
   const [sortBy, setSortBy] = useState("recent"); // 'recent', 'price-low', 'price-high', 'popular'
   const [showFilters, setShowFilters] = useState(false);
@@ -30,65 +27,25 @@ const CategoryProducts = () => {
   const [priceRange, setPriceRange] = useState({ min: "", max: "" });
   const [condition, setCondition] = useState("all"); // 'all', 'new', 'used', 'like-new'
 
-  // Load products with pagination
-  const loadCategoryProducts = useCallback(
-    async (pageNum) => {
-      if (loading || !hasMore) return;
-
-      setLoading(true);
-      try {
-        const result = await productsService.getProductsByCategory(
-          categoryId,
-          pageNum,
-          12
-        );
-
-        if (pageNum === 1) {
-          setProducts(result.products);
-        } else {
-          setProducts((prev) => [...prev, ...result.products]);
-        }
-
-        setHasMore(result.hasMore);
-        setPage(pageNum + 1);
-      } catch (error) {
-        console.error("Error loading products:", error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [categoryId, loading, hasMore]
-  );
-
-  // Load initial products
+  // Load all category products
   useEffect(() => {
     if (category) {
-      setProducts([]);
-      setPage(1);
-      setHasMore(true);
-      loadCategoryProducts(1);
+      loadCategoryProducts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [categoryId, category]);
+  }, [categoryId]);
 
-  // Infinite scroll
-  useEffect(() => {
-    const handleScroll = () => {
-      if (loading || !hasMore) return;
-
-      const scrollTop =
-        window.pageYOffset || document.documentElement.scrollTop;
-      const scrollHeight = document.documentElement.scrollHeight;
-      const clientHeight = document.documentElement.clientHeight;
-
-      if (scrollTop + clientHeight >= scrollHeight - 300) {
-        loadCategoryProducts(page);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [loadCategoryProducts, page, loading, hasMore]);
+  const loadCategoryProducts = async () => {
+    setLoading(true);
+    try {
+      const data = await productsService.getProductsByCategory(categoryId);
+      setProducts(data);
+    } catch (error) {
+      console.error("Error loading products:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Apply filters and sorting
   const getFilteredAndSortedProducts = () => {
@@ -357,26 +314,6 @@ const CategoryProducts = () => {
                 />
               ))}
             </div>
-
-            {/* Loading indicator for infinite scroll */}
-            {loading && (
-              <div className="flex items-center justify-center py-8 mt-8">
-                <FaSpinner className="animate-spin text-3xl text-[#7E22CE]" />
-                <span className="ml-3 text-gray-600 font-instrument">
-                  Loading more products...
-                </span>
-              </div>
-            )}
-
-            {/* No more products message */}
-            {!hasMore && !loading && products.length > 0 && (
-              <div className="text-center py-8 mt-8">
-                <p className="text-gray-500 font-instrument">
-                  🎉 You've seen all {filteredProducts.length} products in this
-                  category!
-                </p>
-              </div>
-            )}
           </>
         )}
       </div>
