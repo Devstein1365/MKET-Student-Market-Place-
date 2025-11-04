@@ -1187,22 +1187,12 @@ const allProducts = mockProducts;
 
 // Service functions
 export const productsService = {
-  // Get all products (with pagination support)
-  getAllProducts: (page = 1, limit = 12) => {
+  // Get all products at once (no pagination)
+  getAllProducts: () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedProducts = allProducts.slice(startIndex, endIndex);
-
-        resolve({
-          products: paginatedProducts,
-          currentPage: page,
-          totalPages: Math.ceil(allProducts.length / limit),
-          totalProducts: allProducts.length,
-          hasMore: endIndex < allProducts.length,
-        });
-      }, 500); // Simulate network delay
+        resolve([...allProducts]);
+      }, 300);
     });
   },
 
@@ -1302,31 +1292,17 @@ export const productsService = {
     });
   },
 
-  // Get products by category (with pagination support)
-  getProductsByCategory: (categoryId, page = 1, limit = 12) => {
+  // Get products by category (no pagination)
+  getProductsByCategory: (categoryId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        let categoryProducts;
         if (categoryId === "all") {
-          categoryProducts = [...allProducts];
+          resolve([...allProducts]);
         } else {
-          categoryProducts = allProducts.filter(
-            (p) => p.category === categoryId
-          );
+          const results = allProducts.filter((p) => p.category === categoryId);
+          resolve(results);
         }
-
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedProducts = categoryProducts.slice(startIndex, endIndex);
-
-        resolve({
-          products: paginatedProducts,
-          currentPage: page,
-          totalPages: Math.ceil(categoryProducts.length / limit),
-          totalProducts: categoryProducts.length,
-          hasMore: endIndex < categoryProducts.length,
-        });
-      }, 500);
+      }, 300);
     });
   },
 

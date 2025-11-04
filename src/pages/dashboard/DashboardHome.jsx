@@ -12,7 +12,6 @@ import {
   FaSlidersH,
   FaMapMarkerAlt,
   FaSortAmountDown,
-  FaSpinner,
 } from "react-icons/fa";
 import ProductCard from "../../components/dashboard/ProductCard";
 import Button from "../../components/shared/Button";
@@ -20,11 +19,13 @@ import Input from "../../components/shared/Input";
 import Badge from "../../components/shared/Badge";
 import productsService from "../../services/productsService";
 import { categories as categoriesData } from "../../data/categories";
-import useInfiniteScroll from "../../hooks/useInfiniteScroll";
 
 const DashboardHome = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
+  const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showDesktopFilters, setShowDesktopFilters] = useState(false);
   const [filters, setFilters] = useState({
@@ -35,15 +36,22 @@ const DashboardHome = () => {
     sortBy: "relevance",
   });
 
-  // Use infinite scroll hook
-  const {
-    data: products,
-    loading,
-    hasMore,
-    error,
-  } = useInfiniteScroll(productsService.getAllProducts, 12);
-
-  const [filteredProducts, setFilteredProducts] = useState([]);
+  // Load all products on mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const data = await productsService.getAllProducts();
+        setProducts(data);
+        setFilteredProducts(data);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, []);
 
   // Handle search and filters
   useEffect(() => {
@@ -298,25 +306,6 @@ const DashboardHome = () => {
                   </motion.div>
                 ))}
               </motion.div>
-
-              {/* Loading indicator for infinite scroll */}
-              {loading && (
-                <div className="flex items-center justify-center py-8">
-                  <FaSpinner className="animate-spin text-3xl text-[#7E22CE]" />
-                  <span className="ml-3 text-[#4B5563] font-instrument">
-                    Loading more products...
-                  </span>
-                </div>
-              )}
-
-              {/* No more products message */}
-              {!hasMore && !loading && products.length > 0 && (
-                <div className="text-center py-8">
-                  <p className="text-[#6B7280] font-instrument">
-                    🎉 You've seen all {products.length} products!
-                  </p>
-                </div>
-              )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center py-16 text-center">
@@ -334,13 +323,6 @@ const DashboardHome = () => {
               <Button variant="outline" onClick={clearAllFilters}>
                 Clear Filters
               </Button>
-            </div>
-          )}
-
-          {/* Error message */}
-          {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-              <p className="text-red-600 font-instrument">{error}</p>
             </div>
           )}
         </section>
