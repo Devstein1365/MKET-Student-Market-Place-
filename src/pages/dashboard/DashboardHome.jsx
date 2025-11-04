@@ -56,8 +56,10 @@ const DashboardHome = () => {
 
   // Handle search and filters
   useEffect(() => {
-    // Only run search/filter if user has actually searched or changed filters
-    // Don't run on initial mount with empty search
+    // If no products loaded yet, don't do anything
+    if (products.length === 0) return;
+
+    // If search is cleared and all filters are default, show all products immediately
     if (
       !searchQuery &&
       filters.category === "all" &&
@@ -65,9 +67,11 @@ const DashboardHome = () => {
       filters.location === "all" &&
       filters.sortBy === "relevance"
     ) {
-      return; // Let the initial load handle showing products
+      setFilteredProducts(products); // Reset to show all products
+      return;
     }
 
+    // Apply search and filters with debounce
     const applySearchAndFilters = async () => {
       try {
         const results = await productsService.searchProducts(
@@ -86,7 +90,7 @@ const DashboardHome = () => {
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, filters]);
+  }, [searchQuery, filters, products]);
 
   const handleFilterChange = (filterName, value) => {
     setFilters((prev) => ({
