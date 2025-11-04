@@ -25,6 +25,7 @@ const Auth = () => {
   const [signupData, setSignupData] = useState({
     fullName: "",
     studentId: "",
+    matricNumber: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -46,14 +47,12 @@ const Auth = () => {
     if (fullName && studentId) {
       // Convert name to lowercase and get first letter + surname
       const nameParts = fullName.toLowerCase().trim().split(" ");
-      
+
       let emailPrefix = "";
 
       if (nameParts.length >= 2) {
-        // Get first letter of first name + full last name
-        emailPrefix = `${nameParts[0].charAt(0)}${
-          nameParts[nameParts.length - 1]
-        }`;
+        // Get  full last name
+        emailPrefix = `${nameParts[nameParts.length - 1]}`;
       } else {
         emailPrefix = nameParts[0];
       }
@@ -261,7 +260,28 @@ const Auth = () => {
                     />
                   </div>
                   <p className="text-xs text-[#4B5563] mt-1 font-instrument">
-                    Your matric number (e.g., m2203183)
+                    Used in your email address (e.g., m2203183)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-[#111827] mb-2 font-inter">
+                    Matric Number
+                  </label>
+                  <div className="relative">
+                    <FaIdCard className="absolute left-4 top-1/2 transform -translate-y-1/2 text-[#4B5563]" />
+                    <input
+                      type="text"
+                      name="matricNumber"
+                      value={signupData.matricNumber}
+                      onChange={handleSignupChange}
+                      required
+                      placeholder="2022/1/12345CS"
+                      className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all outline-none font-instrument"
+                    />
+                  </div>
+                  <p className="text-xs text-[#4B5563] mt-1 font-instrument">
+                    Your official matriculation number for verification
                   </p>
                 </div>
 
