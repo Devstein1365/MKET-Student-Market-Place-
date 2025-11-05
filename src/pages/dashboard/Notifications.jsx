@@ -13,6 +13,7 @@ import Button from "../../components/shared/Button";
 import Card from "../../components/shared/Card";
 import Avatar from "../../components/shared/Avatar";
 import notificationsService from "../../services/notificationsService";
+import { motion } from "framer-motion";
 
 const Notifications = () => {
   const navigate = useNavigate();

@@ -39,7 +39,6 @@ const DashboardHome = () => {
 
   const searchRef = useRef(null);
   const suggestionTimeoutRef = useRef(null);
-  const notificationButtonRef = useRef(null);
 
   // Load all products on mount
   useEffect(() => {
@@ -59,15 +58,16 @@ const DashboardHome = () => {
   }, []);
 
   // Load unread notifications count
+  const loadUnreadCount = async () => {
+    try {
+      const count = await notificationsService.getUnreadCount();
+      setUnreadCount(count);
+    } catch (error) {
+      console.error("Error loading unread count:", error);
+    }
+  };
+
   useEffect(() => {
-    const loadUnreadCount = async () => {
-      try {
-        const count = await notificationsService.getUnreadCount();
-        setUnreadCount(count);
-      } catch (error) {
-        console.error("Error loading unread count:", error);
-      }
-    };
     loadUnreadCount();
   }, []);
 
@@ -272,7 +272,6 @@ const DashboardHome = () => {
 
                 <div className="relative">
                   <button
-                    ref={notificationButtonRef}
                     onClick={() => setShowNotifications(!showNotifications)}
                     className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
                   >
@@ -284,7 +283,7 @@ const DashboardHome = () => {
                   <NotificationDropdown
                     isOpen={showNotifications}
                     onClose={() => setShowNotifications(false)}
-                    buttonRef={notificationButtonRef}
+                    onUpdateCount={loadUnreadCount}
                   />
                 </div>
               </div>
@@ -336,7 +335,6 @@ const DashboardHome = () => {
               {/* Notifications */}
               <div className="relative">
                 <button
-                  ref={notificationButtonRef}
                   onClick={() => setShowNotifications(!showNotifications)}
                   className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
                 >
@@ -348,7 +346,7 @@ const DashboardHome = () => {
                 <NotificationDropdown
                   isOpen={showNotifications}
                   onClose={() => setShowNotifications(false)}
-                  buttonRef={notificationButtonRef}
+                  onUpdateCount={loadUnreadCount}
                 />
               </div>
             </div>
