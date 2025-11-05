@@ -68,10 +68,12 @@ const UserProfile = () => {
               id: 1,
               reviewer: {
                 name: "Ibrahim Musa",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ibrahim",
+                avatar:
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Ibrahim",
               },
               rating: 5,
-              comment: "Excellent seller! Product was exactly as described. Fast response and smooth transaction.",
+              comment:
+                "Excellent seller! Product was exactly as described. Fast response and smooth transaction.",
               productTitle: sellerProducts[0]?.title,
               date: "2024-10-20T14:30:00Z",
             },
@@ -79,11 +81,14 @@ const UserProfile = () => {
               id: 2,
               reviewer: {
                 name: "Fatima Abubakar",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima",
+                avatar:
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima",
               },
               rating: 4,
-              comment: "Good seller, product in good condition. Delivery was a bit delayed but overall satisfied.",
-              productTitle: sellerProducts[1]?.title || sellerProducts[0]?.title,
+              comment:
+                "Good seller, product in good condition. Delivery was a bit delayed but overall satisfied.",
+              productTitle:
+                sellerProducts[1]?.title || sellerProducts[0]?.title,
               date: "2024-10-18T09:15:00Z",
             },
             {
@@ -93,7 +98,8 @@ const UserProfile = () => {
                 avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
               },
               rating: 5,
-              comment: "Highly recommended! Very professional and trustworthy seller.",
+              comment:
+                "Highly recommended! Very professional and trustworthy seller.",
               productTitle: sellerProducts[0]?.title,
               date: "2024-10-15T16:45:00Z",
             },
@@ -101,22 +107,28 @@ const UserProfile = () => {
               id: 4,
               reviewer: {
                 name: "Blessing Okon",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Blessing",
+                avatar:
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Blessing",
               },
               rating: 4,
-              comment: "Nice product, seller was very responsive to my questions. Would buy again.",
-              productTitle: sellerProducts[2]?.title || sellerProducts[0]?.title,
+              comment:
+                "Nice product, seller was very responsive to my questions. Would buy again.",
+              productTitle:
+                sellerProducts[2]?.title || sellerProducts[0]?.title,
               date: "2024-10-12T11:20:00Z",
             },
             {
               id: 5,
               reviewer: {
                 name: "Emmanuel Okeke",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emmanuel",
+                avatar:
+                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Emmanuel",
               },
               rating: 5,
-              comment: "Perfect! Everything went smoothly. Great communication and genuine products.",
-              productTitle: sellerProducts[1]?.title || sellerProducts[0]?.title,
+              comment:
+                "Perfect! Everything went smoothly. Great communication and genuine products.",
+              productTitle:
+                sellerProducts[1]?.title || sellerProducts[0]?.title,
               date: "2024-10-10T08:30:00Z",
             },
           ];
