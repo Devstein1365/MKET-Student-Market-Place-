@@ -5,6 +5,22 @@ import { FaTags } from "react-icons/fa";
 import { categories as categoriesData } from "../../data/categories";
 
 const CategoryGrid = () => {
+  // Show 4 categories on mobile/tablet, 5 on desktop
+  const [isMobile, setIsMobile] = React.useState(
+    typeof window !== "undefined" && window.innerWidth < 1024
+  );
+
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const categoriesToShow = isMobile ? 4 : 5;
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -46,9 +62,9 @@ const CategoryGrid = () => {
         initial="hidden"
         animate="visible"
         variants={containerVariants}
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3"
+        className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"
       >
-        {categoriesData.slice(0, 5).map((category) => (
+        {categoriesData.slice(0, categoriesToShow).map((category) => (
           <motion.div
             key={category.id}
             variants={itemVariants}
