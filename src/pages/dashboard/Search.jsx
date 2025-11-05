@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaSearch,
@@ -9,14 +9,21 @@ import {
   FaSortAmountDown,
   FaThLarge,
   FaList,
+  FaSpinner,
 } from "react-icons/fa";
 import ProductCard from "../../components/dashboard/ProductCard";
 import Input from "../../components/shared/Input";
 import Button from "../../components/shared/Button";
 import Badge from "../../components/shared/Badge";
+import productsService from "../../services/productsService";
 
 const Search = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchInput, setSearchInput] = useState(""); // For typing without triggering search
+  const [hasSearched, setHasSearched] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDesktopFilters, setShowDesktopFilters] = useState(true); // Desktop filter sidebar toggle
   const [viewMode, setViewMode] = useState("grid"); // grid or list
@@ -27,6 +34,10 @@ const Search = () => {
     location: "all",
     sortBy: "relevance",
   });
+  const [searchResults, setSearchResults] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
+  const searchRef = useRef(null);
+  const suggestionTimeoutRef = useRef(null);
 
   // Mock data - categories
   const categories = [
@@ -64,71 +75,125 @@ const Search = () => {
     { id: "popular", name: "Most Popular" },
   ];
 
-  // Mock search results
-  const searchResults = [
-    {
-      id: 1,
-      title: "iPhone 13 Pro Max 256GB - Excellent Condition",
-      price: 450000,
-      originalPrice: 520000,
-      condition: "Used",
-      image:
-        "https://images.unsplash.com/photo-1632661674596-df8be070a5c5?w=400",
-      location: "Bosso Campus",
-      views: 142,
-      seller: {
-        name: "Aisha Mohammed",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 2,
-      title: "MacBook Pro 2021 M1 Chip - Like New",
-      price: 780000,
-      condition: "New",
-      image:
-        "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=400",
-      location: "Gidan Kwano",
-      views: 289,
-      seller: {
-        name: "Chukwudi Okafor",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 3,
-      title: "Samsung Galaxy S23 Ultra 512GB",
-      price: 520000,
-      condition: "New",
-      image:
-        "https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=400",
-      location: "Main Campus",
-      views: 321,
-      seller: {
-        name: "Daniel Adeyemi",
-        avatar: null,
-        verified: true,
-      },
-    },
-    {
-      id: 4,
-      title: "Gaming Laptop - ASUS ROG Strix G15",
-      price: 650000,
-      originalPrice: 750000,
-      condition: "Used",
-      image:
-        "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=400",
-      location: "Bosso Campus",
-      views: 198,
-      seller: {
-        name: "Ibrahim Usman",
-        avatar: null,
-        verified: true,
-      },
-    },
-  ];
+  // Load all products on mount
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const products = await productsService.getAllProducts();
+        setAllProducts(products);
+      } catch (error) {
+        console.error("Error loading products:", error);
+      }
+    };
+    loadProducts();
+  }, []);
+
+  // Generate suggestions as user types
+  useEffect(() => {
+    if (suggestionTimeoutRef.current) {
+      clearTimeout(suggestionTimeoutRef.current);
+    }
+
+    if (searchInput.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    suggestionTimeoutRef.current = setTimeout(() => {
+      const query = searchInput.toLowerCase().trim();
+      
+      // Get matching products (limit to 5 for suggestions)
+      const matchingProducts = allProducts
+        .filter(product => 
+          product.title.toLowerCase().includes(query) ||
+          product.description.toLowerCase().includes(query)
+        )
+        .slice(0, 5);
+
+      // Get matching categories
+      const matchingCategories = categories
+        .filter(cat => 
+          cat.id !== "all" && 
+          cat.name.toLowerCase().includes(query)
+        )
+        .slice(0, 3);
+
+      setSuggestions({
+        products: matchingProducts,
+        categories: matchingCategories,
+      });
+      setShowSuggestions(true);
+    }, 300);
+
+    return () => {
+      if (suggestionTimeoutRef.current) {
+        clearTimeout(suggestionTimeoutRef.current);
+      }
+    };
+  }, [searchInput, allProducts]);
+
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Perform actual search
+  // Helper to run a search with explicit query and filters (avoids race with setState)
+  const searchWith = async (query, filtersOverride) => {
+    const q = (query || "").trim();
+    if (!q) return;
+
+    setLoading(true);
+    setHasSearched(true);
+    setShowSuggestions(false);
+    setSearchQuery(q);
+
+    try {
+      const results = await productsService.searchProducts(q, filtersOverride || filters);
+      setSearchResults(results);
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const performSearch = () => searchWith(searchInput, filters);
+
+  // Handle Enter key
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") {
+      performSearch();
+    }
+  };
+
+  // Handle suggestion click: immediately perform search using the clicked suggestion
+  const handleSuggestionClick = async (suggestion, type) => {
+    if (type === "product") {
+      const q = suggestion.title;
+      setSearchInput(q);
+      // perform search with current filters
+      await searchWith(q, filters);
+    } else if (type === "category") {
+      const q = suggestion.name;
+      // apply category filter immediately and run search with that filter
+      const newFilters = { ...filters, category: suggestion.id };
+      setSearchInput(q);
+      setFilters(newFilters);
+      await searchWith(q, newFilters);
+    }
+
+    setShowSuggestions(false);
+  };
 
   const handleFilterChange = (filterName, value) => {
     setFilters((prev) => ({
@@ -136,6 +201,14 @@ const Search = () => {
       [filterName]: value,
     }));
   };
+
+  // Apply filters to existing search results (client-side filtering)
+  useEffect(() => {
+    if (hasSearched && searchQuery && searchResults.length > 0) {
+      // Re-run search with new filters
+      searchWith(searchQuery, filters);
+    }
+  }, [filters]);
 
   const clearAllFilters = () => {
     setFilters({
@@ -147,6 +220,15 @@ const Search = () => {
     });
   };
 
+  const clearSearch = () => {
+    setSearchInput("");
+    setSearchQuery("");
+    setSearchResults([]);
+    setHasSearched(false);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const activeFiltersCount = Object.values(filters).filter(
     (value) =>
       value !== "all" && value !== "relevance" && value !== filters.priceRange
@@ -156,55 +238,162 @@ const Search = () => {
     <div className="min-h-screen bg-gray-50">
       {/* Header with Search */}
       <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          {/* Search bar */}
-          <div className="flex items-center gap-3">
-            <div className="flex-1">
-              <Input
-                type="search"
-                placeholder="Search for products, sellers, categories..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                icon={<FaSearch />}
-                iconPosition="left"
-                fullWidth
-              />
+        <div className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 ${!hasSearched ? 'flex justify-center' : ''}`}>
+          {/* Search bar - centered before search, normal after */}
+          <div className={`flex items-center gap-3 ${!hasSearched ? 'w-full max-w-3xl' : 'w-full'}`}>
+            <div className="flex-1 relative" ref={searchRef}>
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search for products, sellers, categories..."
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  onFocus={() => searchInput.length >= 2 && setShowSuggestions(true)}
+                  icon={<FaSearch />}
+                  iconPosition="left"
+                  fullWidth
+                />
+                {searchInput && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+                  >
+                    <FaTimes className="text-gray-400 hover:text-gray-600" />
+                  </button>
+                )}
+              </div>
+
+              {/* Suggestions Dropdown */}
+              <AnimatePresence>
+                {showSuggestions && (suggestions.products?.length > 0 || suggestions.categories?.length > 0) && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    className="absolute top-full left-0 right-0 mt-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50 max-h-96 overflow-y-auto"
+                  >
+                    {/* Category Suggestions */}
+                    {suggestions.categories?.length > 0 && (
+                      <div className="border-b border-gray-100">
+                        <div className="px-4 py-2 bg-gray-50">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Categories
+                          </p>
+                        </div>
+                        {suggestions.categories.map((category) => (
+                          <button
+                            key={category.id}
+                            onClick={() => handleSuggestionClick(category, "category")}
+                            className="w-full px-4 py-3 hover:bg-purple-50 transition-colors text-left flex items-center gap-3"
+                          >
+                            <FaFilter className="text-[#7E22CE]" />
+                            <div>
+                              <p className="font-inter font-medium text-gray-900">
+                                {category.name}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                {category.count} products
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Product Suggestions */}
+                    {suggestions.products?.length > 0 && (
+                      <div>
+                        <div className="px-4 py-2 bg-gray-50">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                            Products
+                          </p>
+                        </div>
+                        {suggestions.products.map((product) => (
+                          <button
+                            key={product.id}
+                            onClick={() => handleSuggestionClick(product, "product")}
+                            className="w-full px-4 py-3 hover:bg-purple-50 transition-colors text-left flex items-center gap-3"
+                          >
+                            <img
+                              src={product.image}
+                              alt={product.title}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="font-inter font-medium text-gray-900 truncate">
+                                {product.title}
+                              </p>
+                              <p className="text-sm text-[#7E22CE] font-semibold">
+                                ₦{product.price.toLocaleString()}
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Search prompt */}
+                    <div className="px-4 py-3 bg-gray-50 border-t border-gray-100">
+                      <p className="text-xs text-gray-500 text-center">
+                        Press <kbd className="px-2 py-1 bg-white rounded border border-gray-300 font-mono">Enter</kbd> to search
+                      </p>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            {/* Filter toggle button - Mobile */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden relative p-3 rounded-lg border-2 border-gray-200 hover:border-[#7E22CE] transition-colors"
+            {/* Search Button */}
+            <Button
+              onClick={performSearch}
+              disabled={loading || !searchInput.trim()}
+              className="px-6"
             >
-              <FaSlidersH className="text-[#7E22CE] text-lg" />
-              {activeFiltersCount > 0 && (
-                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#7E22CE] text-white text-xs rounded-full flex items-center justify-center font-bold">
-                  {activeFiltersCount}
-                </span>
+              {loading ? (
+                <FaSpinner className="animate-spin" />
+              ) : (
+                "Search"
               )}
-            </button>
+            </Button>
+
+            {/* Filter toggle button - Mobile - Only show after search */}
+            {hasSearched && (
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className="lg:hidden relative p-3 rounded-lg border-2 border-gray-200 hover:border-[#7E22CE] transition-colors"
+              >
+                <FaSlidersH className="text-[#7E22CE] text-lg" />
+                {activeFiltersCount > 0 && (
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#7E22CE] text-white text-xs rounded-full flex items-center justify-center font-bold">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
+            )}
           </div>
 
           {/* Results info and view toggle */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className="text-sm text-[#4B5563] font-instrument">
-                Found{" "}
-                <span className="font-semibold text-[#111827]">
-                  {searchResults.length}
-                </span>{" "}
-                results
-              </p>
-              {searchQuery && (
-                <span className="text-sm text-[#4B5563] font-instrument">
-                  for "
-                  <span className="font-semibold text-[#7E22CE]">
-                    {searchQuery}
+          {hasSearched && (
+            <div className="flex items-center justify-between mt-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm text-[#4B5563] font-instrument">
+                  Found{" "}
+                  <span className="font-semibold text-[#111827]">
+                    {searchResults.length}
+                  </span>{" "}
+                  results
+                </p>
+                {searchQuery && (
+                  <span className="text-sm text-[#4B5563] font-instrument">
+                    for "
+                    <span className="font-semibold text-[#7E22CE]">
+                      {searchQuery}
+                    </span>
+                    "
                   </span>
-                  "
-                </span>
-              )}
-            </div>
+                )}
+              </div>
 
             {/* View mode and filter toggles */}
             <div className="flex items-center gap-2">
@@ -252,14 +441,46 @@ const Search = () => {
               </button>
             </div>
           </div>
+          )}
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex gap-6">
-          {/* Filters Sidebar - Desktop with collapse */}
-          <AnimatePresence mode="wait">
-            {showDesktopFilters && (
+        {/* Initial state - before search */}
+        {!hasSearched ? (
+          <div className="flex flex-col items-center justify-center py-20 text-center">
+            <div className="w-32 h-32 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-6">
+              <FaSearch className="text-5xl text-[#7E22CE]" />
+            </div>
+            <h2 className="text-3xl font-inter font-bold text-[#111827] mb-3">
+              Search for Products
+            </h2>
+            <p className="text-[#4B5563] font-instrument text-lg mb-6 max-w-2xl">
+              Find what you're looking for from thousands of listings. Start typing to see suggestions.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-8 max-w-3xl">
+              {categories.slice(1, 9).map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setSearchInput(cat.name);
+                    handleFilterChange("category", cat.id);
+                  }}
+                  className="p-4 bg-white rounded-lg border-2 border-gray-200 hover:border-[#7E22CE] hover:bg-purple-50 transition-all group"
+                >
+                  <p className="font-inter font-semibold text-gray-900 group-hover:text-[#7E22CE] text-sm">
+                    {cat.name}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">{cat.count} items</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <div className="flex gap-6">
+            {/* Filters Sidebar - Desktop with collapse */}
+            <AnimatePresence mode="wait">
+              {showDesktopFilters && (
               <motion.aside
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "16rem", opacity: 1 }}
