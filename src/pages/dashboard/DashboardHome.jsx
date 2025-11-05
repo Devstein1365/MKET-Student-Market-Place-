@@ -6,7 +6,9 @@ import SearchBar from "../../components/dashboard/SearchBar";
 import FilterPanel from "../../components/dashboard/FilterPanel";
 import CategoryGrid from "../../components/dashboard/CategoryGrid";
 import ProductsSection from "../../components/dashboard/ProductsSection";
+import NotificationDropdown from "../../components/dashboard/NotificationDropdown";
 import productsService from "../../services/productsService";
+import notificationsService from "../../services/notificationsService";
 import { categories as categoriesData } from "../../data/categories";
 
 const DashboardHome = () => {
@@ -25,6 +27,8 @@ const DashboardHome = () => {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [showDesktopFilters, setShowDesktopFilters] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
   const [filters, setFilters] = useState({
     category: "all",
     condition: "all",
@@ -35,6 +39,7 @@ const DashboardHome = () => {
 
   const searchRef = useRef(null);
   const suggestionTimeoutRef = useRef(null);
+  const notificationButtonRef = useRef(null);
 
   // Load all products on mount
   useEffect(() => {
@@ -51,6 +56,19 @@ const DashboardHome = () => {
       }
     };
     loadProducts();
+  }, []);
+
+  // Load unread notifications count
+  useEffect(() => {
+    const loadUnreadCount = async () => {
+      try {
+        const count = await notificationsService.getUnreadCount();
+        setUnreadCount(count);
+      } catch (error) {
+        console.error("Error loading unread count:", error);
+      }
+    };
+    loadUnreadCount();
   }, []);
 
   // Generate suggestions as user types (NO auto-search)
@@ -252,10 +270,23 @@ const DashboardHome = () => {
                   </button>
                 )}
 
-                <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                  <FaBell className="text-xl text-[#4B5563]" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
+                <div className="relative">
+                  <button
+                    ref={notificationButtonRef}
+                    onClick={() => setShowNotifications(!showNotifications)}
+                    className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <FaBell className="text-xl text-[#4B5563]" />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    )}
+                  </button>
+                  <NotificationDropdown
+                    isOpen={showNotifications}
+                    onClose={() => setShowNotifications(false)}
+                    buttonRef={notificationButtonRef}
+                  />
+                </div>
               </div>
             </div>
 
@@ -303,10 +334,23 @@ const DashboardHome = () => {
               </Link>
 
               {/* Notifications */}
-              <button className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <FaBell className="text-xl text-[#4B5563]" />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-              </button>
+              <div className="relative">
+                <button
+                  ref={notificationButtonRef}
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <FaBell className="text-xl text-[#4B5563]" />
+                  {unreadCount > 0 && (
+                    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                  )}
+                </button>
+                <NotificationDropdown
+                  isOpen={showNotifications}
+                  onClose={() => setShowNotifications(false)}
+                  buttonRef={notificationButtonRef}
+                />
+              </div>
             </div>
           </div>
         </div>

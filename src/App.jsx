@@ -14,6 +14,7 @@ import Messages from "./pages/dashboard/Messages";
 import Profile from "./pages/dashboard/Profile";
 import UserProfile from "./pages/dashboard/UserProfile";
 import Settings from "./pages/dashboard/Settings";
+import Notifications from "./pages/dashboard/Notifications";
 import Categories from "./pages/dashboard/Categories";
 import CategoryProducts from "./pages/dashboard/CategoryProducts";
 
@@ -44,6 +45,7 @@ const App = () => {
               <Route path="profile" element={<Profile />} />
               <Route path="profile/:userId" element={<UserProfile />} />
               <Route path="settings" element={<Settings />} />
+              <Route path="notifications" element={<Notifications />} />
               <Route path="categories" element={<Categories />} />
               <Route
                 path="categories/:categoryId"
