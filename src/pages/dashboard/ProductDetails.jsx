@@ -29,6 +29,7 @@ const ProductDetails = () => {
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [showShareToast, setShowShareToast] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -63,6 +64,63 @@ const ProductDetails = () => {
   const handleWishlistToggle = () => {
     if (product) {
       toggleWishlist(product);
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (product?.seller?.id) {
+      navigate(`/dashboard/profile/${product.seller.id}`);
+    }
+  };
+
+  const handleChatWithSeller = () => {
+    if (product?.seller?.id) {
+      // Navigate to chat page with seller ID and product context
+      navigate(`/dashboard/chat`, {
+        state: {
+          sellerId: product.seller.id,
+          sellerName: product.seller.name,
+          sellerAvatar: product.seller.avatar,
+          productId: product.id,
+          productTitle: product.title,
+          productImage: product.image,
+        },
+      });
+    }
+  };
+
+  const handleShare = async () => {
+    const shareData = {
+      title: product.title,
+      text: `Check out this ${product.title} for ₦${parseInt(
+        product.price
+      ).toLocaleString()}`,
+      url: window.location.href,
+    };
+
+    try {
+      // Check if Web Share API is supported
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: Copy link to clipboard
+        await navigator.clipboard.writeText(window.location.href);
+        setShowShareToast(true);
+        setTimeout(() => setShowShareToast(false), 3000);
+      }
+    } catch (error) {
+      // User cancelled or error occurred
+      if (error.name !== "AbortError") {
+        console.error("Error sharing:", error);
+        // Fallback: Copy to clipboard
+        try {
+          await navigator.clipboard.writeText(window.location.href);
+          setShowShareToast(true);
+          setTimeout(() => setShowShareToast(false), 3000);
+        } catch (clipboardError) {
+          console.error("Clipboard error:", clipboardError);
+        }
+      }
     }
   };
 
@@ -128,6 +186,7 @@ const ProductDetails = () => {
             <div className="flex items-center gap-3">
               <motion.button
                 whileTap={{ scale: 0.9 }}
+                onClick={handleShare}
                 className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
               >
                 <FaShare className="text-gray-600" />
@@ -303,7 +362,7 @@ const ProductDetails = () => {
                     </p>
                   </div>
                 </div>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" onClick={handleViewProfile}>
                   View Profile
                 </Button>
               </div>
@@ -322,7 +381,12 @@ const ProductDetails = () => {
             {/* Action Buttons */}
             <Card>
               <div className="space-y-3">
-                <Button fullWidth size="lg" className="text-lg">
+                <Button
+                  fullWidth
+                  size="lg"
+                  className="text-lg"
+                  onClick={handleChatWithSeller}
+                >
                   Chat with Seller
                 </Button>
                 <div className="grid grid-cols-2 gap-3">
@@ -330,7 +394,7 @@ const ProductDetails = () => {
                     <FaFlag className="mr-2" />
                     Report
                   </Button>
-                  <Button variant="outline" fullWidth>
+                  <Button variant="outline" fullWidth onClick={handleShare}>
                     <FaShare className="mr-2" />
                     Share
                   </Button>
@@ -382,6 +446,21 @@ const ProductDetails = () => {
                 </button>
               </>
             )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Share Toast Notification */}
+      <AnimatePresence>
+        {showShareToast && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-full shadow-lg z-50 flex items-center gap-2"
+          >
+            <FaCheckCircle className="text-[#14B8A6]" />
+            <span className="font-instrument">Link copied to clipboard!</span>
           </motion.div>
         )}
       </AnimatePresence>
