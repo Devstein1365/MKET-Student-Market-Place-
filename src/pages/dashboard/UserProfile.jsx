@@ -22,40 +22,70 @@ const UserProfile = () => {
   const [loading, setLoading] = useState(true);
   const [userProducts, setUserProducts] = useState([]);
   const [activeTab, setActiveTab] = useState("products"); // 'products' or 'reviews'
-
-  // Mock user data (in production, this would come from an API)
-  const [user] = useState({
-    id: userId,
-    name: "John Doe",
-    avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=John",
-    verified: true,
-    bio: "Selling quality products at affordable prices. Fast response guaranteed!",
-    location: "Bosso Campus, Minna",
-    memberSince: "2024-01-15",
-    responseTime: "Within 1 hour",
-    rating: 4.8,
-    totalReviews: 24,
-    totalProducts: 15,
-    totalSales: 48,
-  });
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    const loadUserProducts = async () => {
+    const loadUserData = async () => {
       setLoading(true);
       try {
-        // Get all products and filter by this user (mock implementation)
+        // Get all products
         const allProducts = await productsService.getAllProducts();
-        // In production, you'd filter by seller.id
-        const filtered = allProducts.slice(0, 6); // Mock: showing first 6 products
-        setUserProducts(filtered);
+
+        // Find products by this seller and get seller info from first product
+        const sellerProducts = allProducts.filter(
+          (product) => product.seller.id.toString() === userId
+        );
+
+        if (sellerProducts.length > 0) {
+          // Get seller info from the first product
+          const sellerInfo = sellerProducts[0].seller;
+
+          // Build user profile from seller data
+          setUser({
+            id: sellerInfo.id,
+            name: sellerInfo.name,
+            avatar: sellerInfo.avatar,
+            verified: sellerInfo.verified || false,
+            bio:
+              sellerInfo.bio ||
+              "Passionate about providing quality products and excellent service!",
+            location: sellerInfo.location || "Minna, Niger State",
+            memberSince: sellerInfo.memberSince || "2024-01-15",
+            responseTime: sellerInfo.responseTime || "Within 2 hours",
+            rating: sellerInfo.rating || 4.5,
+            totalReviews: sellerInfo.totalReviews || 12,
+            totalProducts: sellerProducts.length,
+            totalSales:
+              sellerInfo.totalSales || Math.floor(sellerProducts.length * 2.5),
+          });
+
+          setUserProducts(sellerProducts);
+        } else {
+          // If no products found for this seller, show default data
+          setUser({
+            id: userId,
+            name: "User",
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+            verified: false,
+            bio: "No bio available",
+            location: "Location not specified",
+            memberSince: "2024-01-15",
+            responseTime: "Response time not available",
+            rating: 0,
+            totalReviews: 0,
+            totalProducts: 0,
+            totalSales: 0,
+          });
+          setUserProducts([]);
+        }
       } catch (error) {
-        console.error("Error loading user products:", error);
+        console.error("Error loading user data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    loadUserProducts();
+    loadUserData();
   }, [userId]);
 
   const handleChatWithUser = () => {
@@ -80,6 +110,19 @@ const UserProfile = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-[#7E22CE]"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl text-gray-600 font-instrument mb-4">
+            User not found
+          </p>
+          <Button onClick={() => navigate(-1)}>Go Back</Button>
+        </div>
       </div>
     );
   }
