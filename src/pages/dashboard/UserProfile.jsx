@@ -23,6 +23,7 @@ const UserProfile = () => {
   const [userProducts, setUserProducts] = useState([]);
   const [activeTab, setActiveTab] = useState("products"); // 'products' or 'reviews'
   const [user, setUser] = useState(null);
+  const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -60,6 +61,66 @@ const UserProfile = () => {
           });
 
           setUserProducts(sellerProducts);
+
+          // Generate mock reviews for this seller
+          const mockReviews = [
+            {
+              id: 1,
+              reviewer: {
+                name: "Ibrahim Musa",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Ibrahim",
+              },
+              rating: 5,
+              comment: "Excellent seller! Product was exactly as described. Fast response and smooth transaction.",
+              productTitle: sellerProducts[0]?.title,
+              date: "2024-10-20T14:30:00Z",
+            },
+            {
+              id: 2,
+              reviewer: {
+                name: "Fatima Abubakar",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Fatima",
+              },
+              rating: 4,
+              comment: "Good seller, product in good condition. Delivery was a bit delayed but overall satisfied.",
+              productTitle: sellerProducts[1]?.title || sellerProducts[0]?.title,
+              date: "2024-10-18T09:15:00Z",
+            },
+            {
+              id: 3,
+              reviewer: {
+                name: "David Adeyemi",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=David",
+              },
+              rating: 5,
+              comment: "Highly recommended! Very professional and trustworthy seller.",
+              productTitle: sellerProducts[0]?.title,
+              date: "2024-10-15T16:45:00Z",
+            },
+            {
+              id: 4,
+              reviewer: {
+                name: "Blessing Okon",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Blessing",
+              },
+              rating: 4,
+              comment: "Nice product, seller was very responsive to my questions. Would buy again.",
+              productTitle: sellerProducts[2]?.title || sellerProducts[0]?.title,
+              date: "2024-10-12T11:20:00Z",
+            },
+            {
+              id: 5,
+              reviewer: {
+                name: "Emmanuel Okeke",
+                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emmanuel",
+              },
+              rating: 5,
+              comment: "Perfect! Everything went smoothly. Great communication and genuine products.",
+              productTitle: sellerProducts[1]?.title || sellerProducts[0]?.title,
+              date: "2024-10-10T08:30:00Z",
+            },
+          ];
+          setReviews(mockReviews);
         } else {
           // If no products found for this seller, show default data
           setUser({
@@ -324,16 +385,87 @@ const UserProfile = () => {
                 )}
               </div>
             ) : (
-              <Card>
-                <div className="text-center py-12">
-                  <p className="text-gray-600 font-instrument mb-2">
-                    Reviews feature coming soon!
-                  </p>
-                  <p className="text-sm text-gray-500 font-instrument">
-                    Users will be able to see ratings and reviews here.
-                  </p>
-                </div>
-              </Card>
+              <div className="space-y-4">
+                {reviews.length > 0 ? (
+                  reviews.map((review) => (
+                    <Card key={review.id}>
+                      <div className="flex gap-4">
+                        {/* Reviewer Avatar */}
+                        <div className="shrink-0">
+                          <Avatar
+                            src={review.reviewer.avatar}
+                            alt={review.reviewer.name}
+                            size="md"
+                          />
+                        </div>
+
+                        {/* Review Content */}
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <div>
+                              <h4 className="font-inter font-semibold text-gray-900">
+                                {review.reviewer.name}
+                              </h4>
+                              <p className="text-xs text-gray-500 font-instrument">
+                                {new Date(review.date).toLocaleDateString(
+                                  "en-US",
+                                  {
+                                    month: "long",
+                                    day: "numeric",
+                                    year: "numeric",
+                                  }
+                                )}
+                              </p>
+                            </div>
+                            {/* Star Rating */}
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <FaStar
+                                  key={i}
+                                  className={`text-sm ${
+                                    i < review.rating
+                                      ? "text-yellow-500"
+                                      : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                          </div>
+
+                          {/* Review Text */}
+                          <p className="text-gray-700 font-instrument text-sm mb-2">
+                            {review.comment}
+                          </p>
+
+                          {/* Product Reference */}
+                          {review.productTitle && (
+                            <div className="mt-2 pt-2 border-t border-gray-100">
+                              <p className="text-xs text-gray-500 font-instrument">
+                                Product:{" "}
+                                <span className="text-gray-700">
+                                  {review.productTitle}
+                                </span>
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                ) : (
+                  <Card>
+                    <div className="text-center py-12">
+                      <FaStar className="text-gray-300 text-4xl mx-auto mb-3" />
+                      <p className="text-gray-600 font-instrument mb-2">
+                        No reviews yet
+                      </p>
+                      <p className="text-sm text-gray-500 font-instrument">
+                        This seller hasn't received any reviews yet.
+                      </p>
+                    </div>
+                  </Card>
+                )}
+              </div>
             )}
           </div>
         </div>
