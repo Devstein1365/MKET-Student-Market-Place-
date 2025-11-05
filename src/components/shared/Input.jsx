@@ -6,6 +6,8 @@ const Input = ({
   name,
   value,
   onChange,
+  onKeyPress,
+  onFocus,
   placeholder,
   icon,
   iconPosition = "left",
@@ -41,6 +43,8 @@ const Input = ({
           name={name}
           value={value}
           onChange={onChange}
+          onKeyPress={onKeyPress}
+          onFocus={onFocus}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
