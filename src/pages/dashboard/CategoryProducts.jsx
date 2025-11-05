@@ -116,11 +116,11 @@ const CategoryProducts = () => {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <button
-            onClick={() => navigate("/dashboard/categories")}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2 text-white/90 hover:text-white mb-4 transition-colors font-instrument"
           >
             <FaArrowLeft />
-            Back to Categories
+            Back
           </button>
 
           <div className="flex items-center gap-4 mb-4">
