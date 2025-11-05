@@ -154,7 +154,7 @@ const ProductDetails = () => {
           <div className="space-y-4">
             {/* Main Image */}
             <Card padding="none" className="overflow-hidden">
-              <div className="relative aspect-square bg-gray-100">
+              <div className="relative aspect-4/3 lg:aspect-video bg-gray-100">
                 <motion.img
                   key={currentImageIndex}
                   src={images[currentImageIndex]}
