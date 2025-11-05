@@ -80,14 +80,6 @@ const WhyChoose = () => {
             </div>
           ))}
         </div>
-
-        <div className="mt-16 bg-purple-600 text-white p-8 rounded-3xl max-w-4xl mx-auto shadow-lg">
-          <h3 className="text-2xl font-bold mb-3">The Hard Truth:</h3>
-          <p className="text-purple-50 leading-relaxed">
-            Other platforms treat students like side users.
-            <strong> MKET makes you the main character.</strong>
-          </p>
-        </div>
       </div>
     </section>
   );
