@@ -12,6 +12,7 @@ import PostItem from "./pages/dashboard/PostItem";
 import ProductDetails from "./pages/dashboard/ProductDetails";
 import Messages from "./pages/dashboard/Messages";
 import Profile from "./pages/dashboard/Profile";
+import UserProfile from "./pages/dashboard/UserProfile";
 import Settings from "./pages/dashboard/Settings";
 import Categories from "./pages/dashboard/Categories";
 import CategoryProducts from "./pages/dashboard/CategoryProducts";
@@ -41,6 +42,7 @@ const App = () => {
               <Route path="post" element={<PostItem />} />
               <Route path="chat" element={<Messages />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="profile/:userId" element={<UserProfile />} />
               <Route path="settings" element={<Settings />} />
               <Route path="categories" element={<Categories />} />
               <Route

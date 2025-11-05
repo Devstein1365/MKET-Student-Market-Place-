@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaSearch,
@@ -17,6 +18,7 @@ import Avatar from "../../components/shared/Avatar";
 import Card from "../../components/shared/Card";
 
 const Messages = () => {
+  const location = useLocation();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -35,6 +37,54 @@ const Messages = () => {
       try {
         const data = await chatService.getAllConversations();
         setConversations(data);
+
+        // Check if we came from "Chat with Seller" button
+        if (location.state?.sellerId) {
+          const {
+            sellerId,
+            sellerName,
+            sellerAvatar,
+            productId,
+            productTitle,
+            productImage,
+          } = location.state;
+
+          // Find existing conversation with this seller
+          let conversation = data.find((conv) => conv.user.id === sellerId);
+
+          // If no existing conversation, create a new one
+          if (!conversation) {
+            conversation = {
+              id: `new-${sellerId}`,
+              user: {
+                id: sellerId,
+                name: sellerName,
+                avatar: sellerAvatar,
+                online: true,
+              },
+              lastMessage: {
+                text: productTitle
+                  ? `Interested in: ${productTitle}`
+                  : "Start a conversation",
+                time: new Date().toISOString(),
+                isOwn: false,
+              },
+              unreadCount: 0,
+              product: productId
+                ? {
+                    id: productId,
+                    title: productTitle,
+                    image: productImage,
+                  }
+                : null,
+            };
+            // Add to conversations list
+            setConversations([conversation, ...data]);
+          }
+
+          // Auto-select this conversation
+          setSelectedConversation(conversation);
+        }
       } catch (error) {
         console.error("Error loading conversations:", error);
       } finally {
@@ -43,7 +93,7 @@ const Messages = () => {
     };
 
     loadConversations();
-  }, []);
+  }, [location.state]);
 
   // Load messages when conversation is selected
   useEffect(() => {
