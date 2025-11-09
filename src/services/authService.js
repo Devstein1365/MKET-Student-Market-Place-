@@ -83,7 +83,7 @@ class AuthService {
       if (!user) {
         return {
           success: false,
-          message: "Email not found. Please sign up first.",
+          message: "Invalid username or password",
         };
       }
 
@@ -91,7 +91,7 @@ class AuthService {
       if (user.password !== password) {
         return {
           success: false,
-          message: "Incorrect password. Please try again.",
+          message: "Invalid username or password",
         };
       }
 
