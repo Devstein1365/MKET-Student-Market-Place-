@@ -1,8 +1,146 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
+import {
+  FaBook,
+  FaGraduationCap,
+  FaLaptop,
+  FaMobileAlt,
+  FaCalculator,
+  FaCoffee,
+  FaPencilAlt,
+  FaHeadphones,
+  FaBicycle,
+  FaTshirt,
+  FaCamera,
+} from "react-icons/fa";
+import { BiSolidBackpack } from "react-icons/bi";
 
 const Hero = () => {
+  // Floating icon configuration - spread throughout hero section
+  const floatingIcons = [
+    // Top left area
+    {
+      Icon: FaBook,
+      delay: 0,
+      x: "8%",
+      y: "12%",
+      duration: 20,
+      color: "#7E22CE",
+    },
+    {
+      Icon: FaGraduationCap,
+      delay: 2,
+      x: "15%",
+      y: "25%",
+      duration: 25,
+      color: "#14B8A6",
+    },
+    // Top right area
+    {
+      Icon: FaLaptop,
+      delay: 1,
+      x: "85%",
+      y: "18%",
+      duration: 22,
+      color: "#7E22CE",
+    },
+    {
+      Icon: FaPencilAlt,
+      delay: 3.5,
+      x: "92%",
+      y: "28%",
+      duration: 19,
+      color: "#14B8A6",
+    },
+    // Middle left
+    {
+      Icon: FaMobileAlt,
+      delay: 1.5,
+      x: "5%",
+      y: "45%",
+      duration: 23,
+      color: "#7E22CE",
+    },
+    {
+      Icon: BiSolidBackpack,
+      delay: 2.8,
+      x: "10%",
+      y: "58%",
+      duration: 24,
+      color: "#14B8A6",
+    },
+    // Middle right
+    {
+      Icon: FaCalculator,
+      delay: 2.5,
+      x: "88%",
+      y: "48%",
+      duration: 21,
+      color: "#14B8A6",
+    },
+    {
+      Icon: FaHeadphones,
+      delay: 1.8,
+      x: "93%",
+      y: "60%",
+      duration: 24,
+      color: "#7E22CE",
+    },
+    // Bottom left
+    {
+      Icon: FaCoffee,
+      delay: 0.5,
+      x: "12%",
+      y: "78%",
+      duration: 26,
+      color: "#7E22CE",
+    },
+    {
+      Icon: FaCamera,
+      delay: 3.2,
+      x: "18%",
+      y: "88%",
+      duration: 23,
+      color: "#14B8A6",
+    },
+    // Bottom right
+    {
+      Icon: FaBicycle,
+      delay: 2.8,
+      x: "82%",
+      y: "75%",
+      duration: 22,
+      color: "#14B8A6",
+    },
+    {
+      Icon: FaTshirt,
+      delay: 0.8,
+      x: "90%",
+      y: "85%",
+      duration: 25,
+      color: "#7E22CE",
+    },
+    // Top center
+    {
+      Icon: FaBook,
+      delay: 1.2,
+      x: "45%",
+      y: "8%",
+      duration: 21,
+      color: "#14B8A6",
+    },
+    // Bottom center
+    {
+      Icon: FaGraduationCap,
+      delay: 2.7,
+      x: "50%",
+      y: "92%",
+      duration: 24,
+      color: "#7E22CE",
+    },
+  ];
+
   return (
     <section className="relative overflow-hidden bg-[#FFFFFF] pt-20 pb-32 md:pt-24 md:pb-40">
       {/* Gradient Background Blobs */}
@@ -21,6 +159,35 @@ const Hero = () => {
           className="absolute bottom-32 -right-20 w-[500px] h-[500px] rounded-full"
           style={{ background: "linear-gradient(225deg, #14B8A6, #7E22CE)" }}
         />
+
+        {/* Floating Background Icons */}
+        {floatingIcons.map((item, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{
+              opacity: [0.1, 0.2, 0.1],
+              scale: [1, 1.1, 1],
+              y: [0, -20, 0],
+            }}
+            transition={{
+              duration: item.duration,
+              delay: item.delay,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
+            className="absolute"
+            style={{
+              left: item.x,
+              top: item.y,
+            }}
+          >
+            <item.Icon
+              className="text-3xl sm:text-4xl md:text-5xl opacity-60"
+              style={{ color: item.color }}
+            />
+          </motion.div>
+        ))}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -123,12 +290,12 @@ const Hero = () => {
             </motion.p>
           </motion.div>
 
-          {/* Right: Phone Mockup */}
+          {/* Right: Phone Mockup - Hidden on mobile */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8, y: 50 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
-            className="relative flex justify-center md:justify-end"
+            className="relative hidden md:flex justify-center md:justify-end"
           >
             <motion.div
               animate={{ y: [0, -10, 0] }}
