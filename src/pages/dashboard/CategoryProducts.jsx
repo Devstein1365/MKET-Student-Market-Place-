@@ -131,19 +131,16 @@ const CategoryProducts = () => {
               {category.icon}
             </div>
             <div>
-              <h1
-                className="text-3xl font-inter font-bold mb-2"
-                style={{ color: category.color }}
-              >
+              <h1 className="text-3xl font-inter font-bold mb-2 text-white">
                 {category.name}
               </h1>
-              <p className="text-gray-700 font-instrument">
+              <p className="text-white/90 font-instrument">
                 {category.description}
               </p>
             </div>
           </div>
 
-          <p className="text-gray-700 font-instrument">
+          <p className="text-white/80 font-instrument">
             {filteredProducts.length} products available
           </p>
         </div>
