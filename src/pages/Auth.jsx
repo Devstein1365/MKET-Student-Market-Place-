@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaUser, FaEnvelope, FaLock, FaIdCard } from "react-icons/fa";
+import {
+  FaUser,
+  FaEnvelope,
+  FaLock,
+  FaIdCard,
+  FaCheck,
+  FaTimes,
+} from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import PasswordInput from "../components/shared/PasswordInput";
@@ -31,6 +38,16 @@ const Auth = () => {
     confirmPassword: "",
   });
 
+  // Password validation state
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [passwordRequirements, setPasswordRequirements] = useState({
+    minLength: false,
+    hasUppercase: false,
+    hasLowercase: false,
+    hasNumber: false,
+    hasSymbol: false,
+  });
+
   // Forgot password state
   const [forgotPasswordData, setForgotPasswordData] = useState({
     email: "",
@@ -45,7 +62,24 @@ const Auth = () => {
 
   // Handle signup input
   const handleSignupChange = (e) => {
-    setSignupData({ ...signupData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setSignupData({ ...signupData, [name]: value });
+
+    // Validate password requirements in real-time
+    if (name === "password") {
+      validatePassword(value);
+    }
+  };
+
+  // Validate password requirements
+  const validatePassword = (password) => {
+    setPasswordRequirements({
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSymbol: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    });
   };
 
   // Auto-generate email from name and student ID
@@ -108,8 +142,29 @@ const Auth = () => {
       return;
     }
 
-    if (signupData.password.length < 6) {
-      setError("Password must be at least 6 characters long!");
+    // Check password requirements
+    if (signupData.password.length < 8) {
+      setError("Password must be at least 8 characters long!");
+      return;
+    }
+
+    if (!/[A-Z]/.test(signupData.password)) {
+      setError("Password must contain at least one uppercase letter!");
+      return;
+    }
+
+    if (!/[a-z]/.test(signupData.password)) {
+      setError("Password must contain at least one lowercase letter!");
+      return;
+    }
+
+    if (!/[0-9]/.test(signupData.password)) {
+      setError("Password must contain at least one number!");
+      return;
+    }
+
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(signupData.password)) {
+      setError("Password must contain at least one symbol!");
       return;
     }
 
@@ -334,12 +389,18 @@ const Auth = () => {
                       Remember me
                     </span>
                   </label>
-                  <a
-                    href="#"
-                    className="text-sm text-[#7E22CE] hover:text-[#14B8A6] font-medium font-inter"
+
+                  {/* Forgot Password Link */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("forgot");
+                      setError("");
+                    }}
+                    className="text-sm text-[#7E22CE] hover:text-[#6B1FB8] font-instrument font-medium transition-colors"
                   >
-                    Forgot password?
-                  </a>
+                    Forgot Password?
+                  </button>
                 </div>
 
                 <motion.button
@@ -358,20 +419,6 @@ const Auth = () => {
                     "Log In"
                   )}
                 </motion.button>
-
-                {/* Forgot Password Link */}
-                <div className="text-center">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setActiveTab("forgot");
-                      setError("");
-                    }}
-                    className="text-sm text-[#7E22CE] hover:text-[#6B1FB8] font-instrument font-medium transition-colors"
-                  >
-                    Forgot Password?
-                  </button>
-                </div>
               </motion.form>
             ) : activeTab === "signup" ? (
               <motion.form
@@ -470,10 +517,116 @@ const Auth = () => {
                   name="password"
                   value={signupData.password}
                   onChange={handleSignupChange}
+                  onFocus={() => setPasswordFocused(true)}
                   placeholder="Create a strong password"
                   required
-                  showStrengthIndicator={true}
+                  showStrengthIndicator={false}
                 />
+
+                {/* Password Requirements */}
+                {passwordFocused && signupData.password && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200"
+                  >
+                    <p className="text-sm font-inter font-semibold text-gray-700 mb-2">
+                      Password Requirements:
+                    </p>
+                    <div className="space-y-2">
+                      {/* Minimum Length */}
+                      <div className="flex items-center gap-2">
+                        {passwordRequirements.minLength ? (
+                          <FaCheck className="text-green-500 text-sm" />
+                        ) : (
+                          <FaTimes className="text-gray-400 text-sm" />
+                        )}
+                        <span
+                          className={`text-sm font-instrument ${
+                            passwordRequirements.minLength
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          At least 8 characters
+                        </span>
+                      </div>
+
+                      {/* Uppercase Letter */}
+                      <div className="flex items-center gap-2">
+                        {passwordRequirements.hasUppercase ? (
+                          <FaCheck className="text-green-500 text-sm" />
+                        ) : (
+                          <FaTimes className="text-gray-400 text-sm" />
+                        )}
+                        <span
+                          className={`text-sm font-instrument ${
+                            passwordRequirements.hasUppercase
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          One uppercase letter (A-Z)
+                        </span>
+                      </div>
+
+                      {/* Lowercase Letter */}
+                      <div className="flex items-center gap-2">
+                        {passwordRequirements.hasLowercase ? (
+                          <FaCheck className="text-green-500 text-sm" />
+                        ) : (
+                          <FaTimes className="text-gray-400 text-sm" />
+                        )}
+                        <span
+                          className={`text-sm font-instrument ${
+                            passwordRequirements.hasLowercase
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          One lowercase letter (a-z)
+                        </span>
+                      </div>
+
+                      {/* Number */}
+                      <div className="flex items-center gap-2">
+                        {passwordRequirements.hasNumber ? (
+                          <FaCheck className="text-green-500 text-sm" />
+                        ) : (
+                          <FaTimes className="text-gray-400 text-sm" />
+                        )}
+                        <span
+                          className={`text-sm font-instrument ${
+                            passwordRequirements.hasNumber
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          One number (0-9)
+                        </span>
+                      </div>
+
+                      {/* Symbol */}
+                      <div className="flex items-center gap-2">
+                        {passwordRequirements.hasSymbol ? (
+                          <FaCheck className="text-green-500 text-sm" />
+                        ) : (
+                          <FaTimes className="text-gray-400 text-sm" />
+                        )}
+                        <span
+                          className={`text-sm font-instrument ${
+                            passwordRequirements.hasSymbol
+                              ? "text-green-600"
+                              : "text-gray-600"
+                          }`}
+                        >
+                          One symbol (!@#$%^&*)
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
 
                 <ConfirmPasswordInput
                   label="Confirm Password"

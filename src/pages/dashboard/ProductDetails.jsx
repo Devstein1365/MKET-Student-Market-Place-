@@ -30,6 +30,8 @@ const ProductDetails = () => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [showShareToast, setShowShareToast] = useState(false);
+  const [touchStart, setTouchStart] = useState(null);
+  const [touchEnd, setTouchEnd] = useState(null);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,6 +61,40 @@ const ProductDetails = () => {
     setCurrentImageIndex((prev) =>
       prev === (product.images?.length || 1) - 1 ? 0 : prev + 1
     );
+  };
+
+  // Minimum swipe distance (in px) to trigger image change
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(null); // Reset touchEnd
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe) {
+      // Swipe left - go to next image
+      setCurrentImageIndex((prev) =>
+        prev === (product.images?.length || 1) - 1 ? 0 : prev + 1
+      );
+    }
+
+    if (isRightSwipe) {
+      // Swipe right - go to previous image
+      setCurrentImageIndex((prev) =>
+        prev === 0 ? (product.images?.length || 1) - 1 : prev - 1
+      );
+    }
   };
 
   const handleWishlistToggle = () => {
@@ -213,7 +249,12 @@ const ProductDetails = () => {
           <div className="space-y-4">
             {/* Main Image */}
             <Card padding="none" className="overflow-hidden">
-              <div className="relative aspect-4/3 lg:aspect-video bg-gray-100">
+              <div
+                className="relative aspect-4/3 lg:aspect-video bg-gray-100"
+                onTouchStart={onTouchStart}
+                onTouchMove={onTouchMove}
+                onTouchEnd={onTouchEnd}
+              >
                 <motion.img
                   key={currentImageIndex}
                   src={images[currentImageIndex]}
@@ -414,6 +455,9 @@ const ProductDetails = () => {
             exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/95 z-50 flex items-center justify-center p-4"
             onClick={() => setIsImageModalOpen(false)}
+            onTouchStart={onTouchStart}
+            onTouchMove={onTouchMove}
+            onTouchEnd={onTouchEnd}
           >
             <button
               onClick={() => setIsImageModalOpen(false)}

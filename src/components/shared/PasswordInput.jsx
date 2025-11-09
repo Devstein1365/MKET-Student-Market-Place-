@@ -5,6 +5,7 @@ import { checkPasswordStrength } from "../../utils/passwordStrength";
 const PasswordInput = ({
   value,
   onChange,
+  onFocus,
   name,
   placeholder = "Enter password",
   showStrengthIndicator = false,
@@ -50,6 +51,7 @@ const PasswordInput = ({
           name={name}
           value={value}
           onChange={onChange}
+          onFocus={onFocus}
           className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all font-instrument"
           placeholder={placeholder}
           required={required}
