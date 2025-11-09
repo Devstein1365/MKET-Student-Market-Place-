@@ -23,16 +23,16 @@ const Hero = () => {
     {
       Icon: FaBook,
       delay: 0,
-      x: "8%",
-      y: "12%",
+      x: "12%",
+      y: "19%",
       duration: 20,
       color: "#7E22CE",
     },
     {
       Icon: FaGraduationCap,
       delay: 2,
-      x: "15%",
-      y: "25%",
+      x: "20%",
+      y: "28%",
       duration: 25,
       color: "#14B8A6",
     },
@@ -40,16 +40,16 @@ const Hero = () => {
     {
       Icon: FaLaptop,
       delay: 1,
-      x: "85%",
-      y: "18%",
+      x: "78%",
+      y: "20%",
       duration: 22,
       color: "#7E22CE",
     },
     {
       Icon: FaPencilAlt,
       delay: 3.5,
-      x: "92%",
-      y: "28%",
+      x: "56%",
+      y: "32%",
       duration: 19,
       color: "#14B8A6",
     },
@@ -57,16 +57,16 @@ const Hero = () => {
     {
       Icon: FaMobileAlt,
       delay: 1.5,
-      x: "5%",
-      y: "45%",
+      x: "8%",
+      y: "48%",
       duration: 23,
       color: "#7E22CE",
     },
     {
       Icon: BiSolidBackpack,
       delay: 2.8,
-      x: "10%",
-      y: "58%",
+      x: "25%",
+      y: "50%",
       duration: 24,
       color: "#14B8A6",
     },
@@ -74,16 +74,16 @@ const Hero = () => {
     {
       Icon: FaCalculator,
       delay: 2.5,
-      x: "88%",
-      y: "48%",
+      x: "82%",
+      y: "52%",
       duration: 21,
       color: "#14B8A6",
     },
     {
       Icon: FaHeadphones,
       delay: 1.8,
-      x: "93%",
-      y: "60%",
+      x: "88%",
+      y: "64%",
       duration: 24,
       color: "#7E22CE",
     },
@@ -91,16 +91,16 @@ const Hero = () => {
     {
       Icon: FaCoffee,
       delay: 0.5,
-      x: "12%",
-      y: "78%",
+      x: "10%",
+      y: "60%",
       duration: 26,
       color: "#7E22CE",
     },
     {
       Icon: FaCamera,
       delay: 3.2,
-      x: "18%",
-      y: "88%",
+      x: "25%",
+      y: "65%",
       duration: 23,
       color: "#14B8A6",
     },
@@ -108,16 +108,16 @@ const Hero = () => {
     {
       Icon: FaBicycle,
       delay: 2.8,
-      x: "82%",
-      y: "75%",
+      x: "75%",
+      y: "68%",
       duration: 22,
       color: "#14B8A6",
     },
     {
       Icon: FaTshirt,
       delay: 0.8,
-      x: "90%",
-      y: "85%",
+      x: "82%",
+      y: "68%",
       duration: 25,
       color: "#7E22CE",
     },
@@ -125,8 +125,8 @@ const Hero = () => {
     {
       Icon: FaBook,
       delay: 1.2,
-      x: "45%",
-      y: "8%",
+      x: "48%",
+      y: "12%",
       duration: 21,
       color: "#14B8A6",
     },
@@ -134,8 +134,8 @@ const Hero = () => {
     {
       Icon: FaGraduationCap,
       delay: 2.7,
-      x: "50%",
-      y: "92%",
+      x: "52%",
+      y: "42%",
       duration: 24,
       color: "#7E22CE",
     },
@@ -166,7 +166,7 @@ const Hero = () => {
             key={index}
             initial={{ opacity: 0, scale: 0 }}
             animate={{
-              opacity: [0.1, 0.2, 0.1],
+              opacity: [0.2, 0.3, 0.2],
               scale: [1, 1.1, 1],
               y: [0, -20, 0],
             }}
@@ -176,15 +176,15 @@ const Hero = () => {
               repeat: Infinity,
               ease: "easeInOut",
             }}
-            className="absolute"
+            className="absolute md:hidden"
             style={{
               left: item.x,
               top: item.y,
             }}
           >
             <item.Icon
-              className="text-3xl sm:text-4xl md:text-5xl opacity-60"
-              style={{ color: item.color }}
+              className="text-3xl sm:text-4xl md:text-5xl"
+              style={{ color: item.color, opacity: 0.9 }}
             />
           </motion.div>
         ))}
