@@ -16,6 +16,7 @@ import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
 import Avatar from "../../components/shared/Avatar";
 import Card from "../../components/shared/Card";
+import Modal from "../../components/shared/Modal";
 
 const Messages = () => {
   const location = useLocation();
@@ -29,6 +30,22 @@ const Messages = () => {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const showModal = (title, message, type = "info") => {
+    setModal({ isOpen: true, title, message, type });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
 
   // Load conversations
   useEffect(() => {
@@ -180,7 +197,7 @@ const Messages = () => {
       );
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("Failed to send message. Please try again.");
+      showModal("Error", "Failed to send message. Please try again.", "error");
     } finally {
       setSending(false);
     }
@@ -560,6 +577,15 @@ const Messages = () => {
           </div>
         </div>
       )}
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

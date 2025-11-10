@@ -4,6 +4,7 @@ import { FaBox, FaEye, FaShoppingBag, FaCog } from "react-icons/fa";
 import { useAuth } from "../../context/AuthContext";
 import Button from "../../components/shared/Button";
 import Card from "../../components/shared/Card";
+import Modal from "../../components/shared/Modal";
 import ProfileHeader from "../../components/profile/ProfileHeader";
 import ContactInfo from "../../components/profile/ContactInfo";
 import StatsCard from "../../components/profile/StatsCard";
@@ -39,6 +40,22 @@ const Profile = () => {
 
   const [imageToCrop, setImageToCrop] = useState(null);
   const [showCropper, setShowCropper] = useState(false);
+
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const showModal = (title, message, type = "info") => {
+    setModal({ isOpen: true, title, message, type });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
 
   useEffect(() => {
     loadMyListings();
@@ -92,9 +109,13 @@ const Profile = () => {
     const result = updateUser(profileData);
     if (result.success) {
       setIsEditMode(false);
-      alert("Profile updated successfully!");
+      showModal("Success!", "Profile updated successfully!", "success");
     } else {
-      alert("Failed to update profile. Please try again.");
+      showModal(
+        "Error",
+        "Failed to update profile. Please try again.",
+        "error"
+      );
     }
   };
 
@@ -251,6 +272,15 @@ const Profile = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

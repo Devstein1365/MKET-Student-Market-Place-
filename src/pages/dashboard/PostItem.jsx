@@ -13,6 +13,7 @@ import {
 } from "react-icons/fa";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
+import Modal from "../../components/shared/Modal";
 import { categories as categoriesData } from "../../services/productsService";
 import { generateProductDescription } from "../../services/geminiService";
 
@@ -32,13 +33,33 @@ const PostItem = () => {
   const [errors, setErrors] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
 
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+  });
+
+  const showModal = (title, message, type = "info") => {
+    setModal({ isOpen: true, title, message, type });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
+
   // Handle image upload
   const handleImageUpload = (files) => {
     const fileArray = Array.from(files);
     const remainingSlots = 6 - images.length;
 
     if (remainingSlots <= 0) {
-      alert("Maximum 6 images allowed!");
+      showModal(
+        "Maximum Images Reached",
+        "You can only upload up to 6 images.",
+        "warning"
+      );
       return;
     }
 
@@ -94,15 +115,27 @@ const PostItem = () => {
   const handleGenerateDescription = async () => {
     // Validate required fields for AI generation
     if (!formData.title.trim()) {
-      alert("Please enter a product title first!");
+      showModal(
+        "Title Required",
+        "Please enter a product title first!",
+        "warning"
+      );
       return;
     }
     if (!formData.category) {
-      alert("Please select a category first!");
+      showModal(
+        "Category Required",
+        "Please select a category first!",
+        "warning"
+      );
       return;
     }
     if (!formData.price || parseFloat(formData.price) <= 0) {
-      alert("Please enter a valid price first!");
+      showModal(
+        "Price Required",
+        "Please enter a valid price first!",
+        "warning"
+      );
       return;
     }
 
@@ -119,8 +152,10 @@ const PostItem = () => {
       }
     } catch (error) {
       console.error("Error generating description:", error);
-      alert(
-        "Failed to generate description. Please try again or write it manually."
+      showModal(
+        "Generation Failed",
+        "Failed to generate description. Please try again or write it manually.",
+        "error"
       );
     } finally {
       setIsGenerating(false);
@@ -167,7 +202,11 @@ const PostItem = () => {
     console.log("Images:", images);
 
     // Show success message
-    alert("Product posted successfully! (Backend integration pending)");
+    showModal(
+      "Success!",
+      "Product posted successfully! (Backend integration pending)",
+      "success"
+    );
   };
 
   const conditions = ["New", "Used", "Fairly Used"];
@@ -523,6 +562,15 @@ const PostItem = () => {
           </Button>
         </div>
       </form>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+      />
     </div>
   );
 };

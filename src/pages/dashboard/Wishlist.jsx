@@ -1,15 +1,40 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaHeart, FaHome, FaShoppingBag, FaTrash } from "react-icons/fa";
 import { useWishlist } from "../../context/WishlistContext";
 import ProductCard from "../../components/dashboard/ProductCard";
 import Button from "../../components/shared/Button";
+import Modal from "../../components/shared/Modal";
 
 const Wishlist = () => {
   const navigate = useNavigate();
   const { wishlistItems, removeFromWishlist, clearWishlist, wishlistCount } =
     useWishlist();
+
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "confirm",
+    showCancel: false,
+    onConfirm: null,
+  });
+
+  const showModal = (
+    title,
+    message,
+    type = "confirm",
+    showCancel = true,
+    onConfirm = null
+  ) => {
+    setModal({ isOpen: true, title, message, type, showCancel, onConfirm });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -63,13 +88,13 @@ const Wishlist = () => {
                 icon={<FaTrash />}
                 iconPosition="left"
                 onClick={() => {
-                  if (
-                    window.confirm(
-                      "Are you sure you want to clear your entire wishlist?"
-                    )
-                  ) {
-                    clearWishlist();
-                  }
+                  showModal(
+                    "Clear Wishlist",
+                    "Are you sure you want to clear your entire wishlist?",
+                    "confirm",
+                    true,
+                    () => clearWishlist()
+                  );
                 }}
               >
                 Clear All
@@ -183,6 +208,17 @@ const Wishlist = () => {
           </motion.div>
         )}
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        showCancel={modal.showCancel}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 };

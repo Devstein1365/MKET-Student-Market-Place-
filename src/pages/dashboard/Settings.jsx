@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../../context/AuthContext";
 import Card from "../../components/shared/Card";
 import Button from "../../components/shared/Button";
+import Modal from "../../components/shared/Modal";
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -25,11 +26,41 @@ const Settings = () => {
     updates: false,
   });
 
+  // Modal state
+  const [modal, setModal] = useState({
+    isOpen: false,
+    title: "",
+    message: "",
+    type: "info",
+    showCancel: false,
+    onConfirm: null,
+  });
+
+  const showModal = (
+    title,
+    message,
+    type = "info",
+    showCancel = false,
+    onConfirm = null
+  ) => {
+    setModal({ isOpen: true, title, message, type, showCancel, onConfirm });
+  };
+
+  const closeModal = () => {
+    setModal({ ...modal, isOpen: false });
+  };
+
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to logout?")) {
-      logout();
-      navigate("/auth", { replace: true });
-    }
+    showModal(
+      "Confirm Logout",
+      "Are you sure you want to logout?",
+      "confirm",
+      true,
+      () => {
+        logout();
+        navigate("/auth", { replace: true });
+      }
+    );
   };
 
   const settingsSections = [
@@ -46,7 +77,12 @@ const Settings = () => {
           icon: FaLock,
           label: "Change Password",
           description: "Update your password",
-          action: () => alert("Password change coming soon!"),
+          action: () =>
+            showModal(
+              "Coming Soon",
+              "Password change feature coming soon!",
+              "info"
+            ),
         },
       ],
     },
@@ -104,13 +140,15 @@ const Settings = () => {
           icon: FaPalette,
           label: "Theme",
           description: "Light mode (Dark mode coming soon)",
-          action: () => alert("Dark mode coming soon!"),
+          action: () =>
+            showModal("Coming Soon", "Dark mode feature coming soon!", "info"),
         },
         {
           icon: FaLanguage,
           label: "Language",
           description: "English (More languages coming soon)",
-          action: () => alert("More languages coming soon!"),
+          action: () =>
+            showModal("Coming Soon", "More languages coming soon!", "info"),
         },
       ],
     },
@@ -219,6 +257,17 @@ const Settings = () => {
           <p className="mt-1">Version 1.0.0</p>
         </div>
       </div>
+
+      {/* Modal */}
+      <Modal
+        isOpen={modal.isOpen}
+        onClose={closeModal}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        showCancel={modal.showCancel}
+        onConfirm={modal.onConfirm}
+      />
     </div>
   );
 };
