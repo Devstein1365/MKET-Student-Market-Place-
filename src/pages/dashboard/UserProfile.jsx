@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import ReviewForm from "../../components/profile/ReviewForm";
 import ReviewsList from "../../components/profile/ReviewsList";
+import authService from "../../services/authService";
 
 import { motion } from "framer-motion";
 import {
@@ -27,6 +28,25 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("products"); // 'products' or 'reviews'
   const [user, setUser] = useState(null);
   const [reviews, setReviews] = useState([]);
+  // Read current user synchronously to avoid initial UI flicker
+  const [currentUserId, setCurrentUserId] = useState(() => {
+    if (typeof window === "undefined") return null;
+    // Prefer explicit key used elsewhere; fall back to older/demo keys
+    const v1 = window.localStorage.getItem("currentUserId");
+    if (v1) return v1;
+    try {
+      const cu = window.localStorage.getItem("mket_current_user");
+      if (cu) return JSON.parse(cu).id;
+    } catch {
+      // ignore
+    }
+    const fromAuth = authService.getCurrentUser();
+    return fromAuth ? fromAuth.id : null;
+  });
+  const [canReview, setCanReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [reviewEligibilityChecked, setReviewEligibilityChecked] =
+    useState(false);
 
   useEffect(() => {
     const loadUserData = async () => {
@@ -162,7 +182,47 @@ const UserProfile = () => {
     };
 
     loadUserData();
-  }, [userId]);
+  }, [userId, currentUserId]);
+
+  // Allow any logged-in user to leave feedback (no transaction check needed)
+  useEffect(() => {
+    // prefer demo key, then project auth key
+    const id =
+      window.localStorage.getItem("currentUserId") ||
+      (() => {
+        try {
+          const cu = window.localStorage.getItem("mket_current_user");
+          return cu ? JSON.parse(cu).id : null;
+        } catch {
+          return null;
+        }
+      })();
+
+    // keep state in sync in case login status changed elsewhere
+    if (id !== currentUserId) setCurrentUserId(id);
+
+    if (!id) {
+      setCanReview(false);
+      setHasReviewed(false);
+      setReviewEligibilityChecked(true);
+      return;
+    }
+
+    try {
+      // check if this user already left a review for this seller
+      const revKey = `reviews:${userId}`;
+      const revRaw = window.localStorage.getItem(revKey);
+      const existing = revRaw ? JSON.parse(revRaw) : [];
+      const already = existing.some((r) => String(r.authorId) === String(id));
+      setHasReviewed(Boolean(already));
+      setCanReview(!already);
+      setReviewEligibilityChecked(true);
+    } catch {
+      console.warn("Failed to parse reviews for review eligibility");
+      setCanReview(false);
+      setReviewEligibilityChecked(true);
+    }
+  }, [userId, currentUserId]);
 
   const handleChatWithUser = () => {
     navigate("/dashboard/chat", {
@@ -172,6 +232,53 @@ const UserProfile = () => {
         sellerAvatar: user.avatar,
       },
     });
+  };
+
+  // Review submission handler (demo/localStorage)
+  const handleSubmitReview = async ({
+    rating,
+    text,
+    authorId,
+    targetUserId,
+  }) => {
+    try {
+      const authorName =
+        window.localStorage.getItem("currentUserName") || "Anonymous";
+      const newReview = {
+        id: Date.now(),
+        authorId: authorId || currentUserId || null,
+        authorName,
+        rating,
+        text,
+        createdAt: new Date().toISOString(),
+      };
+
+      // update local state
+      setReviews((prev) => [newReview, ...(prev || [])]);
+
+      // persist to localStorage per-seller
+      const key = `reviews:${targetUserId || user.id}`;
+      const raw = window.localStorage.getItem(key);
+      const arr = raw ? JSON.parse(raw) : [];
+      arr.unshift(newReview);
+      window.localStorage.setItem(key, JSON.stringify(arr));
+
+      // recompute rating summary on user
+      const all = [newReview, ...(reviews || [])];
+      const sum = all.reduce((s, r) => s + (r.rating || 0), 0);
+      const avg = all.length ? sum / all.length : 0;
+      setUser((prev) => ({
+        ...(prev || {}),
+        rating: Number(avg.toFixed(1)),
+        totalReviews: all.length,
+      }));
+      // mark that the current user has reviewed so the form hides immediately
+      setHasReviewed(true);
+      setCanReview(false);
+    } catch (err) {
+      console.error("Failed to submit review", err);
+      throw err;
+    }
   };
 
   const formatMemberSince = (dateString) => {
@@ -401,15 +508,45 @@ const UserProfile = () => {
               </div>
             ) : (
               <div className="space-y-4">
+                {/* Review input area: only show to eligible buyers */}
+                <Card>
+                  {!reviewEligibilityChecked ? (
+                    <div className="p-4 text-sm text-gray-700">
+                      Checking eligibility…
+                    </div>
+                  ) : currentUserId ? (
+                    hasReviewed ? (
+                      <div className="p-4 text-sm text-gray-700">
+                        You have already left a review for this seller. Thank
+                        you!
+                      </div>
+                    ) : canReview ? (
+                      <ReviewForm
+                        targetUserId={user.id}
+                        authorId={currentUserId}
+                        onSubmit={handleSubmitReview}
+                      />
+                    ) : (
+                      <div className="p-4 text-sm text-gray-700">
+                        Only buyers who completed a purchase from this seller
+                        can leave a review. If you bought from this seller, make
+                        sure the transaction is marked completed.
+                      </div>
+                    )
+                  ) : (
+                    <></>
+                  )}
+                </Card>
+
                 {reviews.length > 0 ? (
                   reviews.map((review) => (
                     <Card key={review.id}>
                       <div className="flex gap-4">
-                        {/* Reviewer Avatar */}
+                        {/* Reviewer Avatar, use available avatar or initials */}
                         <div className="shrink-0">
                           <Avatar
-                            src={review.reviewer.avatar}
-                            alt={review.reviewer.name}
+                            src={review.reviewer?.avatar || null}
+                            alt={review.reviewer?.name || review.authorName}
                             size="md"
                           />
                         </div>
@@ -419,17 +556,18 @@ const UserProfile = () => {
                           <div className="flex items-start justify-between mb-2">
                             <div>
                               <h4 className="font-inter font-semibold text-gray-900">
-                                {review.reviewer.name}
+                                {review.reviewer?.name ||
+                                  review.authorName ||
+                                  "Anonymous"}
                               </h4>
                               <p className="text-xs text-gray-500 font-instrument">
-                                {new Date(review.date).toLocaleDateString(
-                                  "en-US",
-                                  {
-                                    month: "long",
-                                    day: "numeric",
-                                    year: "numeric",
-                                  }
-                                )}
+                                {new Date(
+                                  review.createdAt || review.date
+                                ).toLocaleDateString("en-US", {
+                                  month: "long",
+                                  day: "numeric",
+                                  year: "numeric",
+                                })}
                               </p>
                             </div>
                             {/* Star Rating */}
@@ -438,7 +576,7 @@ const UserProfile = () => {
                                 <FaStar
                                   key={i}
                                   className={`text-sm ${
-                                    i < review.rating
+                                    i < (review.rating || 0)
                                       ? "text-yellow-500"
                                       : "text-gray-300"
                                   }`}
@@ -449,16 +587,16 @@ const UserProfile = () => {
 
                           {/* Review Text */}
                           <p className="text-gray-700 font-instrument text-sm mb-2">
-                            {review.comment}
+                            {review.text || review.comment}
                           </p>
 
                           {/* Product Reference */}
-                          {review.productTitle && (
+                          {(review.productTitle || review.product) && (
                             <div className="mt-2 pt-2 border-t border-gray-100">
                               <p className="text-xs text-gray-500 font-instrument">
                                 Product:{" "}
                                 <span className="text-gray-700">
-                                  {review.productTitle}
+                                  {review.productTitle || review.product}
                                 </span>
                               </p>
                             </div>
