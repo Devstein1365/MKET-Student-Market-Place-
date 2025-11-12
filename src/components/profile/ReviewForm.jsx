@@ -17,11 +17,16 @@ const ReviewForm = ({
   onSubmit,
   initialRating = 0,
   initialText = "",
+  initialProductTitle = null,
+  products = [],
   submitLabel = "Submit Review",
   onCancel,
 }) => {
   const [rating, setRating] = useState(initialRating);
   const [text, setText] = useState(initialText);
+  const [selectedProduct, setSelectedProduct] = useState(
+    initialProductTitle || (products[0] && products[0].title) || null
+  );
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -39,7 +44,13 @@ const ReviewForm = ({
       return;
     }
 
-    const payload = { rating, text: text.trim(), authorId, targetUserId };
+    const payload = {
+      rating,
+      text: text.trim(),
+      authorId,
+      targetUserId,
+      productTitle: selectedProduct,
+    };
     setSubmitting(true);
     try {
       if (onSubmit) {
@@ -50,6 +61,7 @@ const ReviewForm = ({
       }
       setText("");
       setRating(0);
+      // keep selected product if provided; don't clear so user can submit several reviews
     } catch (err) {
       setError(err.message || "Failed to submit review");
     } finally {
@@ -83,6 +95,26 @@ const ReviewForm = ({
         placeholder="Write a short review (what went well, any issues)"
         className="w-full border p-2 rounded mb-2"
       />
+
+      {products && products.length > 0 && (
+        <div className="mb-2">
+          <label className="text-xs text-gray-600 mb-1 block">
+            About product (optional)
+          </label>
+          <select
+            value={selectedProduct || ""}
+            onChange={(e) => setSelectedProduct(e.target.value || null)}
+            className="w-full border p-2 rounded"
+          >
+            <option value="">General / Seller</option>
+            {products.map((p) => (
+              <option key={p.id} value={p.title}>
+                {p.title}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
 

@@ -297,6 +297,7 @@ const UserProfile = () => {
     text,
     authorId,
     targetUserId,
+    productTitle,
   }) => {
     try {
       const authorName = getCurrentUserName();
@@ -308,6 +309,8 @@ const UserProfile = () => {
           ...editingReview,
           rating,
           text,
+          productTitle:
+            productTitle || editingReview.productTitle || editingReview.product,
           authorId: authorId || currentUserId || null,
           authorName,
           createdAt: now,
@@ -348,6 +351,7 @@ const UserProfile = () => {
         authorName,
         rating,
         text,
+        productTitle: productTitle || null,
         createdAt: now,
       };
 
@@ -641,6 +645,24 @@ const UserProfile = () => {
                     <div className="p-4 text-sm text-gray-700">
                       Checking eligibility…
                     </div>
+                  ) : editing && editingReview ? (
+                    // Editing takes precedence — show edit form regardless
+                    <ReviewForm
+                      targetUserId={user.id}
+                      authorId={currentUserId}
+                      initialRating={editingReview.rating}
+                      initialText={editingReview.text}
+                      initialProductTitle={
+                        editingReview.productTitle || editingReview.product
+                      }
+                      products={userProducts}
+                      submitLabel="Update Review"
+                      onCancel={() => {
+                        setEditing(false);
+                        setEditingReview(null);
+                      }}
+                      onSubmit={handleSubmitReview}
+                    />
                   ) : currentUserId ? (
                     hasReviewed ? (
                       // show the user's own review with an edit button
@@ -709,26 +731,12 @@ const UserProfile = () => {
                         );
                       })()
                     ) : canReview ? (
-                      editing && editingReview ? (
-                        <ReviewForm
-                          targetUserId={user.id}
-                          authorId={currentUserId}
-                          initialRating={editingReview.rating}
-                          initialText={editingReview.text}
-                          submitLabel="Update Review"
-                          onCancel={() => {
-                            setEditing(false);
-                            setEditingReview(null);
-                          }}
-                          onSubmit={handleSubmitReview}
-                        />
-                      ) : (
-                        <ReviewForm
-                          targetUserId={user.id}
-                          authorId={currentUserId}
-                          onSubmit={handleSubmitReview}
-                        />
-                      )
+                      <ReviewForm
+                        targetUserId={user.id}
+                        authorId={currentUserId}
+                        products={userProducts}
+                        onSubmit={handleSubmitReview}
+                      />
                     ) : (
                       <div className="p-4 text-sm text-gray-700">
                         {/* no message for anonymous viewers */}
