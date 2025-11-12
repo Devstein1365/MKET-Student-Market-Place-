@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import ReviewForm from "../../components/profile/ReviewForm";
+import ReviewsList from "../../components/profile/ReviewsList";
+
 import { motion } from "framer-motion";
 import {
   FaArrowLeft,

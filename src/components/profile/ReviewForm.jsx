@@ -1,0 +1,94 @@
+import React, { useState } from "react";
+import { FaStar } from "react-icons/fa";
+
+/**
+ * ReviewForm
+ * Props:
+ * - targetUserId: id of the user being reviewed (optional, informative)
+ * - authorId: id of the reviewer (optional)
+ * - onSubmit: async function({ rating, text, authorId, targetUserId }) => Promise
+ *
+ * This component is backend-agnostic: pass an onSubmit prop that talks to your
+ * data layer (localDb or server). If none is provided it will console.log the payload.
+ */
+const ReviewForm = ({ targetUserId, authorId, onSubmit }) => {
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleStar = (value) => setRating(value);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    if (rating < 1) {
+      setError("Please select a rating.");
+      return;
+    }
+    if (text.trim().length < 5) {
+      setError("Please enter at least 5 characters for your review.");
+      return;
+    }
+
+    const payload = { rating, text: text.trim(), authorId, targetUserId };
+    setSubmitting(true);
+    try {
+      if (onSubmit) {
+        await onSubmit(payload);
+      } else {
+        // fallback: log to console
+        console.log("Review submit", payload);
+      }
+      setText("");
+      setRating(0);
+    } catch (err) {
+      setError(err.message || "Failed to submit review");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="p-4 border rounded bg-white">
+      <div className="mb-2 font-semibold">Leave a review</div>
+      <div className="flex items-center gap-2 mb-3">
+        {[1, 2, 3, 4, 5].map((s) => (
+          <button
+            key={s}
+            type="button"
+            onClick={() => handleStar(s)}
+            className={`text-xl ${
+              s <= rating ? "text-yellow-500" : "text-gray-300"
+            }`}
+            aria-label={`Rate ${s} star${s > 1 ? "s" : ""}`}
+          >
+            <FaStar />
+          </button>
+        ))}
+      </div>
+
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={4}
+        placeholder="Write a short review (what went well, any issues)"
+        className="w-full border p-2 rounded mb-2"
+      />
+
+      {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
+
+      <div className="flex justify-end">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="px-4 py-2 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white rounded disabled:opacity-50"
+        >
+          {submitting ? "Submitting..." : "Submit Review"}
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default ReviewForm;
