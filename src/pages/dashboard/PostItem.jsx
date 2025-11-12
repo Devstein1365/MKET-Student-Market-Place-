@@ -111,6 +111,60 @@ const PostItem = () => {
     }
   };
 
+  // Helpers for numeric formatting
+  const cleanNumber = (val) => {
+    if (val === null || val === undefined) return "";
+    const s = String(val);
+    // allow digits and dot only
+    const cleaned = s.replace(/[^0-9.]/g, "");
+    const parts = cleaned.split(".");
+    if (parts.length <= 1) return parts[0];
+    // keep only first dot, join remaining decimals
+    return parts[0] + "." + parts.slice(1).join("");
+  };
+
+  const formatIntWithCommas = (intStr) => {
+    if (!intStr) return "";
+    try {
+      return Number(intStr).toLocaleString();
+    } catch {
+      return intStr;
+    }
+  };
+
+  const handlePriceChange = (name, rawValue) => {
+    const cleaned = cleanNumber(rawValue);
+    const [intPart, decPart] = cleaned.split(".");
+    const intFormatted = intPart ? formatIntWithCommas(intPart) : "";
+    const display =
+      decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
+    setFormData((prev) => ({ ...prev, [name]: display }));
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
+  };
+
+  const handlePriceBlur = (name) => {
+    const val = formData[name];
+    if (!val) return;
+    const cleaned = cleanNumber(val);
+    const num = Number(cleaned || 0);
+    if (Number.isNaN(num)) return;
+    const formatted = num.toLocaleString(undefined, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+    setFormData((prev) => ({ ...prev, [name]: formatted }));
+  };
+
+  const handlePriceFocus = (name) => {
+    const val = formData[name];
+    if (!val) return;
+    // remove commas but keep decimals
+    const raw = String(val).replace(/,/g, "");
+    setFormData((prev) => ({ ...prev, [name]: raw }));
+  };
+
   // Generate AI description
   const handleGenerateDescription = async () => {
     // Validate required fields for AI generation
@@ -130,7 +184,7 @@ const PostItem = () => {
       );
       return;
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!formData.price || Number(cleanNumber(formData.price)) <= 0) {
       showModal(
         "Price Required",
         "Please enter a valid price first!",
@@ -172,7 +226,7 @@ const PostItem = () => {
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
     }
-    if (!formData.price || parseFloat(formData.price) <= 0) {
+    if (!formData.price || Number(cleanNumber(formData.price)) <= 0) {
       newErrors.price = "Valid price is required";
     }
     if (!formData.category) {
@@ -197,9 +251,18 @@ const PostItem = () => {
       return;
     }
 
-    // TODO: Handle form submission to backend
-    console.log("Form Data:", formData);
-    console.log("Images:", images);
+    // Prepare submission payload: convert formatted price strings to numbers
+    const submitPayload = {
+      ...formData,
+      price: Number(cleanNumber(formData.price)),
+      originalPrice: formData.originalPrice
+        ? Number(cleanNumber(formData.originalPrice))
+        : null,
+      images,
+    };
+
+    // TODO: Handle form submission to backend (send submitPayload)
+    console.log("Form Data:", submitPayload);
 
     // Show success message
     showModal(
@@ -487,9 +550,11 @@ const PostItem = () => {
             <Input
               label="Selling Price"
               name="price"
-              type="number"
+              type="text"
               value={formData.price}
-              onChange={handleInputChange}
+              onChange={(e) => handlePriceChange("price", e.target.value)}
+              onBlur={() => handlePriceBlur("price")}
+              onFocus={() => handlePriceFocus("price")}
               placeholder="0"
               leftIcon={<span className="text-[#4B5563]">₦</span>}
               error={errors.price}
@@ -499,9 +564,13 @@ const PostItem = () => {
             <Input
               label="Original Price (Optional)"
               name="originalPrice"
-              type="number"
+              type="text"
               value={formData.originalPrice}
-              onChange={handleInputChange}
+              onChange={(e) =>
+                handlePriceChange("originalPrice", e.target.value)
+              }
+              onBlur={() => handlePriceBlur("originalPrice")}
+              onFocus={() => handlePriceFocus("originalPrice")}
               placeholder="0"
               leftIcon={<span className="text-[#4B5563]">₦</span>}
               helperText="Show discount if item was more expensive"

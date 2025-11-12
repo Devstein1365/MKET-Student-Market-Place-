@@ -8,6 +8,7 @@ const Input = ({
   onChange,
   onKeyPress,
   onFocus,
+  onBlur,
   placeholder,
   icon,
   iconPosition = "left",
@@ -45,6 +46,7 @@ const Input = ({
           onChange={onChange}
           onKeyPress={onKeyPress}
           onFocus={onFocus}
+          onBlur={onBlur}
           placeholder={placeholder}
           required={required}
           disabled={disabled}
