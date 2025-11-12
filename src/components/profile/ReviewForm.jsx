@@ -11,9 +11,17 @@ import { FaStar } from "react-icons/fa";
  * This component is backend-agnostic: pass an onSubmit prop that talks to your
  * data layer (localDb or server). If none is provided it will console.log the payload.
  */
-const ReviewForm = ({ targetUserId, authorId, onSubmit }) => {
-  const [rating, setRating] = useState(0);
-  const [text, setText] = useState("");
+const ReviewForm = ({
+  targetUserId,
+  authorId,
+  onSubmit,
+  initialRating = 0,
+  initialText = "",
+  submitLabel = "Submit Review",
+  onCancel,
+}) => {
+  const [rating, setRating] = useState(initialRating);
+  const [text, setText] = useState(initialText);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
@@ -78,14 +86,25 @@ const ReviewForm = ({ targetUserId, authorId, onSubmit }) => {
 
       {error && <div className="text-sm text-red-600 mb-2">{error}</div>}
 
-      <div className="flex justify-end">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="px-4 py-2 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white rounded disabled:opacity-50"
-        >
-          {submitting ? "Submitting..." : "Submit Review"}
-        </button>
+      <div className="flex justify-between">
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="px-4 py-2 border rounded text-gray-700 mr-2"
+          >
+            Cancel
+          </button>
+        )}
+        <div className="ml-auto">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="px-4 py-2 bg-linear-to-r from-[#7E22CE] to-[#14B8A6] text-white rounded disabled:opacity-50"
+          >
+            {submitting ? "Submitting..." : submitLabel}
+          </button>
+        </div>
       </div>
     </form>
   );

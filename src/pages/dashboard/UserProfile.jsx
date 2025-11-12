@@ -28,6 +28,43 @@ const UserProfile = () => {
   const [activeTab, setActiveTab] = useState("products"); // 'products' or 'reviews'
   const [user, setUser] = useState(null);
   const [reviews, setReviews] = useState([]);
+  const [editing, setEditing] = useState(false);
+  const [editingReview, setEditingReview] = useState(null);
+
+  const getCurrentUserName = () => {
+    try {
+      const nameFromKey = window.localStorage.getItem("currentUserName");
+      if (nameFromKey) return nameFromKey;
+      const cu = window.localStorage.getItem("mket_current_user");
+      if (cu) return JSON.parse(cu).name;
+      const svc = authService.getCurrentUser();
+      return svc ? svc.name : "Anonymous";
+    } catch {
+      return "Anonymous";
+    }
+  };
+
+  const getUserNameById = (id) => {
+    try {
+      if (!id) return null;
+      // check current user
+      const cu = window.localStorage.getItem("mket_current_user");
+      if (cu) {
+        const parsed = JSON.parse(cu);
+        if (String(parsed.id) === String(id)) return parsed.name;
+      }
+      // check users list
+      const usersRaw = window.localStorage.getItem("mket_users");
+      if (usersRaw) {
+        const users = JSON.parse(usersRaw);
+        const found = users.find((u) => String(u.id) === String(id));
+        if (found) return found.name;
+      }
+    } catch {
+      // ignore
+    }
+    return null;
+  };
   // Read current user synchronously to avoid initial UI flicker
   const [currentUserId, setCurrentUserId] = useState(() => {
     if (typeof window === "undefined") return null;
@@ -155,7 +192,27 @@ const UserProfile = () => {
               date: "2024-10-10T08:30:00Z",
             },
           ];
-          setReviews(mockReviews);
+          // load any stored reviews for this seller (persisted by demo flow)
+          try {
+            const storedKey = `reviews:${sellerInfo.id}`;
+            const storedRaw = window.localStorage.getItem(storedKey);
+            const stored = storedRaw ? JSON.parse(storedRaw) : [];
+            const combined = [...stored, ...mockReviews];
+            setReviews(combined);
+
+            // compute aggregated rating
+            const sum = combined.reduce((s, r) => s + (r.rating || 0), 0);
+            const avg = combined.length
+              ? sum / combined.length
+              : sellerInfo.rating || 0;
+            setUser((prev) => ({
+              ...(prev || {}),
+              rating: Number(avg.toFixed(1)),
+              totalReviews: combined.length,
+            }));
+          } catch (err) {
+            setReviews(mockReviews);
+          }
         } else {
           // If no products found for this seller, show default data
           setUser({
@@ -242,15 +299,56 @@ const UserProfile = () => {
     targetUserId,
   }) => {
     try {
-      const authorName =
-        window.localStorage.getItem("currentUserName") || "Anonymous";
+      const authorName = getCurrentUserName();
+      const now = new Date().toISOString();
+
+      // if editing an existing review (same author), update it
+      if (editing && editingReview) {
+        const updated = {
+          ...editingReview,
+          rating,
+          text,
+          authorId: authorId || currentUserId || null,
+          authorName,
+          createdAt: now,
+        };
+
+        // update state
+        setReviews((prev) =>
+          (prev || []).map((r) => (r.id === updated.id ? updated : r))
+        );
+
+        // persist
+        const key = `reviews:${targetUserId || user.id}`;
+        const raw = window.localStorage.getItem(key);
+        const arr = raw ? JSON.parse(raw) : [];
+        const newArr = arr.map((r) => (r.id === updated.id ? updated : r));
+        window.localStorage.setItem(key, JSON.stringify(newArr));
+
+        // recompute rating summary
+        const all = newArr;
+        const sum = all.reduce((s, r) => s + (r.rating || 0), 0);
+        const avg = all.length ? sum / all.length : 0;
+        setUser((prev) => ({
+          ...(prev || {}),
+          rating: Number(avg.toFixed(1)),
+          totalReviews: all.length,
+        }));
+        setEditing(false);
+        setEditingReview(null);
+        setHasReviewed(true);
+        setCanReview(false);
+        return;
+      }
+
+      // create new review
       const newReview = {
         id: Date.now(),
         authorId: authorId || currentUserId || null,
         authorName,
         rating,
         text,
-        createdAt: new Date().toISOString(),
+        createdAt: now,
       };
 
       // update local state
@@ -280,6 +378,35 @@ const UserProfile = () => {
       throw err;
     }
   };
+
+  // ensure we read any stored reviews for this seller even if there are no products
+  useEffect(() => {
+    try {
+      const key = `reviews:${userId}`;
+      const raw = window.localStorage.getItem(key);
+      const stored = raw ? JSON.parse(raw) : [];
+      if (stored && stored.length > 0) {
+        // merge with existing reviews while avoiding duplicates
+        setReviews((prev = []) => {
+          const map = new Map();
+          (stored || []).concat(prev || []).forEach((r) => map.set(r.id, r));
+          return Array.from(map.values()).sort((a, b) => b.id - a.id);
+        });
+
+        // recompute rating summary
+        const all = stored;
+        const sum = all.reduce((s, r) => s + (r.rating || 0), 0);
+        const avg = all.length ? sum / all.length : 0;
+        setUser((prev) => ({
+          ...(prev || {}),
+          rating: Number(avg.toFixed(1)),
+          totalReviews: all.length,
+        }));
+      }
+    } catch {
+      // ignore
+    }
+  }, [userId]);
 
   const formatMemberSince = (dateString) => {
     const date = new Date(dateString);
@@ -516,21 +643,95 @@ const UserProfile = () => {
                     </div>
                   ) : currentUserId ? (
                     hasReviewed ? (
-                      <div className="p-4 text-sm text-gray-700">
-                        You have already left a review for this seller. Thank
-                        you!
-                      </div>
+                      // show the user's own review with an edit button
+                      (() => {
+                        const my = reviews.find(
+                          (r) => String(r.authorId) === String(currentUserId)
+                        );
+                        if (!my) {
+                          return (
+                            <div className="p-4 text-sm text-gray-700">
+                              You have already left a review for this seller.
+                              Thank you!
+                            </div>
+                          );
+                        }
+                        return (
+                          <Card>
+                            <div className="flex justify-between items-start">
+                              <div className="flex items-center gap-3">
+                                <Avatar
+                                  src={my.reviewer?.avatar || null}
+                                  alt={my.authorName}
+                                  size="md"
+                                />
+                                <div>
+                                  <div className="font-inter font-semibold">
+                                    {my.authorName ||
+                                      getUserNameById(my.authorId) ||
+                                      "Anonymous"}
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    {new Date(
+                                      my.createdAt || my.date
+                                    ).toLocaleDateString()}
+                                  </div>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <div className="flex items-center">
+                                  {[...Array(5)].map((_, i) => (
+                                    <FaStar
+                                      key={i}
+                                      className={`text-sm ${
+                                        i < (my.rating || 0)
+                                          ? "text-yellow-500"
+                                          : "text-gray-300"
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <button
+                                  className="px-3 py-1 text-sm border rounded bg-white"
+                                  onClick={() => {
+                                    setEditing(true);
+                                    setEditingReview(my);
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                              </div>
+                            </div>
+                            <div className="mt-3 text-gray-700">
+                              {my.text || my.comment}
+                            </div>
+                          </Card>
+                        );
+                      })()
                     ) : canReview ? (
-                      <ReviewForm
-                        targetUserId={user.id}
-                        authorId={currentUserId}
-                        onSubmit={handleSubmitReview}
-                      />
+                      editing && editingReview ? (
+                        <ReviewForm
+                          targetUserId={user.id}
+                          authorId={currentUserId}
+                          initialRating={editingReview.rating}
+                          initialText={editingReview.text}
+                          submitLabel="Update Review"
+                          onCancel={() => {
+                            setEditing(false);
+                            setEditingReview(null);
+                          }}
+                          onSubmit={handleSubmitReview}
+                        />
+                      ) : (
+                        <ReviewForm
+                          targetUserId={user.id}
+                          authorId={currentUserId}
+                          onSubmit={handleSubmitReview}
+                        />
+                      )
                     ) : (
                       <div className="p-4 text-sm text-gray-700">
-                        Only buyers who completed a purchase from this seller
-                        can leave a review. If you bought from this seller, make
-                        sure the transaction is marked completed.
+                        {/* no message for anonymous viewers */}
                       </div>
                     )
                   ) : (
