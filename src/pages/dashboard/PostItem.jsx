@@ -14,8 +14,16 @@ import {
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
 import Modal from "../../components/shared/Modal";
+import CustomSelect from "../../components/shared/CustomSelect";
 import { categories as categoriesData } from "../../services/productsService";
 import { generateProductDescription } from "../../services/geminiService";
+import {
+  formatAsUserTyping,
+  formatOnBlur,
+  parseToNumber,
+  toKobo,
+  cleanNumber,
+} from "../../utils/price";
 
 const PostItem = () => {
   const [images, setImages] = useState([]);
@@ -111,34 +119,10 @@ const PostItem = () => {
     }
   };
 
-  // Helpers for numeric formatting
-  const cleanNumber = (val) => {
-    if (val === null || val === undefined) return "";
-    const s = String(val);
-    // allow digits and dot only
-    const cleaned = s.replace(/[^0-9.]/g, "");
-    const parts = cleaned.split(".");
-    if (parts.length <= 1) return parts[0];
-    // keep only first dot, join remaining decimals
-    return parts[0] + "." + parts.slice(1).join("");
-  };
-
-  const formatIntWithCommas = (intStr) => {
-    if (!intStr) return "";
-    try {
-      return Number(intStr).toLocaleString();
-    } catch {
-      return intStr;
-    }
-  };
-
+  // Price formatting helpers
   const handlePriceChange = (name, rawValue) => {
-    const cleaned = cleanNumber(rawValue);
-    const [intPart, decPart] = cleaned.split(".");
-    const intFormatted = intPart ? formatIntWithCommas(intPart) : "";
-    const display =
-      decPart !== undefined ? `${intFormatted}.${decPart}` : intFormatted;
-    setFormData((prev) => ({ ...prev, [name]: display }));
+    const formatted = formatAsUserTyping(rawValue);
+    setFormData((prev) => ({ ...prev, [name]: formatted }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
@@ -147,13 +131,7 @@ const PostItem = () => {
   const handlePriceBlur = (name) => {
     const val = formData[name];
     if (!val) return;
-    const cleaned = cleanNumber(val);
-    const num = Number(cleaned || 0);
-    if (Number.isNaN(num)) return;
-    const formatted = num.toLocaleString(undefined, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    });
+    const formatted = formatOnBlur(val);
     setFormData((prev) => ({ ...prev, [name]: formatted }));
   };
 
@@ -226,7 +204,7 @@ const PostItem = () => {
     if (!formData.description.trim()) {
       newErrors.description = "Description is required";
     }
-    if (!formData.price || Number(cleanNumber(formData.price)) <= 0) {
+    if (!formData.price || parseToNumber(formData.price) <= 0) {
       newErrors.price = "Valid price is required";
     }
     if (!formData.category) {
@@ -254,9 +232,9 @@ const PostItem = () => {
     // Prepare submission payload: convert formatted price strings to numbers
     const submitPayload = {
       ...formData,
-      price: Number(cleanNumber(formData.price)),
+      price: parseToNumber(formData.price),
       originalPrice: formData.originalPrice
-        ? Number(cleanNumber(formData.originalPrice))
+        ? parseToNumber(formData.originalPrice)
         : null,
       images,
     };
@@ -483,33 +461,23 @@ const PostItem = () => {
           </div>
 
           {/* Category */}
-          <div>
-            <label className="block text-sm font-inter font-medium text-[#111827] mb-2">
-              Category <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg font-instrument text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all ${
-                errors.category ? "border-red-500" : "border-gray-300"
-              }`}
-            >
-              <option value="">Select a category</option>
-              {categoriesData
-                .filter((cat) => cat.id !== "all")
-                .map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.icon} {category.name}
-                  </option>
-                ))}
-            </select>
-            {errors.category && (
-              <p className="text-red-500 text-sm mt-1 font-instrument">
-                {errors.category}
-              </p>
-            )}
-          </div>
+          <CustomSelect
+            label="Category"
+            name="category"
+            value={formData.category}
+            onChange={handleInputChange}
+            options={categoriesData
+              .filter((cat) => cat.id !== "all")
+              .map((category) => ({
+                value: category.id,
+                label: category.name,
+                icon: category.icon,
+              }))}
+            placeholder="Select a category"
+            icon={FaTag}
+            error={errors.category}
+            required
+          />
 
           {/* Condition */}
           <div>
@@ -587,32 +555,20 @@ const PostItem = () => {
             </h2>
           </div>
 
-          <div>
-            <label className="block text-sm font-inter font-medium text-[#111827] mb-2">
-              Where is this item located?{" "}
-              <span className="text-red-500">*</span>
-            </label>
-            <select
-              name="location"
-              value={formData.location}
-              onChange={handleInputChange}
-              className={`w-full px-4 py-3 border rounded-lg font-instrument text-[#111827] focus:outline-none focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent transition-all ${
-                errors.location ? "border-red-500" : "border-gray-300"
-              }`}
-            >
-              <option value="">Select location</option>
-              {locations.map((location) => (
-                <option key={location} value={location}>
-                  {location}
-                </option>
-              ))}
-            </select>
-            {errors.location && (
-              <p className="text-red-500 text-sm mt-1 font-instrument">
-                {errors.location}
-              </p>
-            )}
-          </div>
+          <CustomSelect
+            label="Where is this item located?"
+            name="location"
+            value={formData.location}
+            onChange={handleInputChange}
+            options={locations.map((loc) => ({
+              value: loc,
+              label: loc,
+            }))}
+            placeholder="Select location"
+            icon={FaMapMarkerAlt}
+            error={errors.location}
+            required
+          />
         </div>
 
         {/* Submit Buttons */}

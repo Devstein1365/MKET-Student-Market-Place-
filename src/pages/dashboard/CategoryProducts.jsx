@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import {
   FaArrowLeft,
   FaFilter,
   FaSortAmountDown,
   FaThLarge,
   FaList,
+  FaBox,
 } from "react-icons/fa";
 import { getCategoryById } from "../../data/categories";
 import productsService from "../../services/productsService";
 import ProductCard from "../../components/dashboard/ProductCard";
 import Button from "../../components/shared/Button";
+import CustomSelect from "../../components/shared/CustomSelect";
 
 const CategoryProducts = () => {
   const { categoryId } = useParams();
@@ -162,19 +165,19 @@ const CategoryProducts = () => {
               </Button>
 
               {/* Sort Dropdown */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="pl-10 pr-8 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent font-instrument text-sm appearance-none bg-white cursor-pointer"
-                >
-                  <option value="recent">Most Recent</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="popular">Most Popular</option>
-                </select>
-                <FaSortAmountDown className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
-              </div>
+              <CustomSelect
+                name="sortBy"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                options={[
+                  { value: "recent", label: "Most Recent" },
+                  { value: "price-low", label: "Price: Low to High" },
+                  { value: "price-high", label: "Price: High to Low" },
+                  { value: "popular", label: "Most Popular" },
+                ]}
+                icon={FaSortAmountDown}
+                placeholder="Sort by"
+              />
             </div>
 
             {/* Right side - View toggle */}
@@ -240,21 +243,19 @@ const CategoryProducts = () => {
                 </div>
 
                 {/* Condition */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2 font-inter">
-                    Condition
-                  </label>
-                  <select
-                    value={condition}
-                    onChange={(e) => setCondition(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent font-instrument text-sm"
-                  >
-                    <option value="all">All Conditions</option>
-                    <option value="new">New</option>
-                    <option value="like-new">Like New</option>
-                    <option value="used">Used</option>
-                  </select>
-                </div>
+                <CustomSelect
+                  label="Condition"
+                  name="condition"
+                  value={condition}
+                  onChange={(e) => setCondition(e.target.value)}
+                  options={[
+                    { value: "all", label: "All Conditions" },
+                    { value: "new", label: "New" },
+                    { value: "like-new", label: "Like New" },
+                    { value: "used", label: "Used" },
+                  ]}
+                  icon={FaBox}
+                />
 
                 {/* Clear Filters */}
                 <div className="flex items-end">

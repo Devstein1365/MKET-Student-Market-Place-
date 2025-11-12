@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaBox } from "react-icons/fa";
+import CustomSelect from "../shared/CustomSelect";
 
 /**
  * ReviewForm
@@ -98,21 +99,20 @@ const ReviewForm = ({
 
       {products && products.length > 0 && (
         <div className="mb-2">
-          <label className="text-xs text-gray-600 mb-1 block">
-            About product (optional)
-          </label>
-          <select
+          <CustomSelect
+            label="About product (optional)"
+            name="productTitle"
             value={selectedProduct || ""}
             onChange={(e) => setSelectedProduct(e.target.value || null)}
-            className="w-full border p-2 rounded"
-          >
-            <option value="">General / Seller</option>
-            {products.map((p) => (
-              <option key={p.id} value={p.title}>
-                {p.title}
-              </option>
-            ))}
-          </select>
+            options={[
+              { value: "", label: "General / Seller" },
+              ...products.map((p) => ({
+                value: p.title,
+                label: p.title,
+              })),
+            ]}
+            icon={FaBox}
+          />
         </div>
       )}
 

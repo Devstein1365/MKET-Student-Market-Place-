@@ -1,7 +1,8 @@
 import React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { FaTimes } from "react-icons/fa";
+import { FaTimes, FaTag, FaMapMarkerAlt, FaSort } from "react-icons/fa";
 import Button from "../shared/Button";
+import CustomSelect from "../shared/CustomSelect";
 import { categories as categoriesData } from "../../data/categories";
 
 const FilterPanel = ({
@@ -42,19 +43,21 @@ const FilterPanel = ({
     <>
       {/* Category */}
       <div className="mb-4">
-        <h4 className="font-inter font-semibold text-sm mb-2">Category</h4>
-        <select
+        <CustomSelect
+          label="Category"
+          name="category"
           value={filters.category}
           onChange={(e) => handleFilterChange("category", e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent"
-        >
-          <option value="all">All Categories</option>
-          {categoriesData.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+          options={[
+            { value: "all", label: "All Categories" },
+            ...categoriesData.map((cat) => ({
+              value: cat.id,
+              label: cat.name,
+              icon: cat.icon,
+            })),
+          ]}
+          icon={FaTag}
+        />
       </div>
 
       {/* Condition */}
@@ -116,34 +119,32 @@ const FilterPanel = ({
 
       {/* Location */}
       <div className="mb-4">
-        <h4 className="font-inter font-semibold text-sm mb-2">Location</h4>
-        <select
+        <CustomSelect
+          label="Location"
+          name="location"
           value={filters.location}
           onChange={(e) => handleFilterChange("location", e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent"
-        >
-          {locations.map((loc) => (
-            <option key={loc.id} value={loc.id}>
-              {loc.name}
-            </option>
-          ))}
-        </select>
+          options={locations.map((loc) => ({
+            value: loc.id,
+            label: loc.name,
+          }))}
+          icon={FaMapMarkerAlt}
+        />
       </div>
 
       {/* Sort */}
       <div>
-        <h4 className="font-inter font-semibold text-sm mb-2">Sort By</h4>
-        <select
+        <CustomSelect
+          label="Sort By"
+          name="sortBy"
           value={filters.sortBy}
           onChange={(e) => handleFilterChange("sortBy", e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#7E22CE] focus:border-transparent"
-        >
-          {sortOptions.map((opt) => (
-            <option key={opt.id} value={opt.id}>
-              {opt.name}
-            </option>
-          ))}
-        </select>
+          options={sortOptions.map((opt) => ({
+            value: opt.id,
+            label: opt.name,
+          }))}
+          icon={FaSort}
+        />
       </div>
     </>
   );

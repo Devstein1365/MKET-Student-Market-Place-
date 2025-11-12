@@ -5,6 +5,7 @@ import {
   FaMapMarkerAlt,
   FaCalendar,
 } from "react-icons/fa";
+import CustomSelect from "../shared/CustomSelect";
 
 const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
   return (
@@ -57,21 +58,22 @@ const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
       <div className="flex items-start gap-3">
         <FaMapMarkerAlt className="text-gray-400 mt-1 shrink-0" />
         <div className="flex-1 min-w-0">
-          <p className="text-xs text-gray-500 font-instrument">Location</p>
+          <p className="text-xs text-gray-500 font-instrument mb-1">Location</p>
           {isEditMode ? (
-            <select
+            <CustomSelect
+              name="location"
               value={profileData.location}
               onChange={(e) =>
                 onEdit({ ...profileData, location: e.target.value })
               }
-              className="w-full text-sm text-gray-900 font-instrument border-b border-gray-300 focus:outline-none focus:border-[#7E22CE]"
-            >
-              <option>Bosso Campus</option>
-              <option>Gidan Kwano</option>
-              <option>Main Campus</option>
-              <option>Tunga</option>
-              <option>Minna Town</option>
-            </select>
+              options={[
+                { value: "Bosso Campus", label: "Bosso Campus" },
+                { value: "Gidan Kwano", label: "Gidan Kwano" },
+                { value: "Main Campus", label: "Main Campus" },
+                { value: "Tunga", label: "Tunga" },
+                { value: "Minna Town", label: "Minna Town" },
+              ]}
+            />
           ) : (
             <p className="text-sm text-gray-900 font-instrument">
               {profileData.location}
