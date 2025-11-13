@@ -203,33 +203,19 @@ const Messages = () => {
       setMessageInput("");
       setImagePreview(null);
 
-      // Update conversation list and also update the selected conversation
-      setConversations((prev) =>
-        prev
-          .map((conv) =>
-            conv.id === selectedConversation.id
-              ? {
-                  ...conv,
-                  lastMessage: {
-                    ...newMessage,
-                    text: newMessage.text,
-                  },
-                  updatedAt: newMessage.timestamp,
-                }
-              : conv
-          )
-          .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-      );
+      // Reload conversations from service to get updated data from localStorage
+      const updatedConversations = await chatService.getAllConversations();
+      setConversations(updatedConversations);
 
-      // Also update the selectedConversation so it shows in the sidebar
-      setSelectedConversation((prev) => ({
-        ...prev,
-        lastMessage: {
-          ...newMessage,
-          text: newMessage.text,
-        },
-        updatedAt: newMessage.timestamp,
-      }));
+      // Update the selectedConversation with the new lastMessage
+      const updatedSelectedConv = updatedConversations.find(
+        (conv) =>
+          conv.id === selectedConversation.id ||
+          String(conv.id) === String(selectedConversation.id)
+      );
+      if (updatedSelectedConv) {
+        setSelectedConversation(updatedSelectedConv);
+      }
     } catch (error) {
       console.error("Error sending message:", error);
       showModal("Error", "Failed to send message. Please try again.", "error");

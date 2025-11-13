@@ -415,12 +415,35 @@ export const chatService = {
   searchConversations: (query) => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Load stored conversations from localStorage
+        const storedConversations = loadFromStorage(
+          STORAGE_KEYS.CONVERSATIONS,
+          []
+        );
+
+        // Merge with mock conversations (prioritize stored ones)
+        const mergedConversations = [...storedConversations];
+
+        // Add mock conversations that don't exist in stored
+        mockConversations.forEach((mockConv) => {
+          const exists = storedConversations.some(
+            (stored) => stored.id === mockConv.id
+          );
+          if (!exists) {
+            mergedConversations.push(mockConv);
+          }
+        });
+
         if (!query.trim()) {
-          resolve([...mockConversations]);
+          // Sort by most recent
+          const sorted = mergedConversations.sort(
+            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+          );
+          resolve(sorted);
           return;
         }
 
-        const filtered = mockConversations.filter((conv) => {
+        const filtered = mergedConversations.filter((conv) => {
           const nameMatch = conv.participant.name
             .toLowerCase()
             .includes(query.toLowerCase());
@@ -433,7 +456,12 @@ export const chatService = {
           return nameMatch || productMatch || messageMatch;
         });
 
-        resolve(filtered);
+        // Sort by most recent
+        const sorted = filtered.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+
+        resolve(sorted);
       }, 200);
     });
   },
