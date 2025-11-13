@@ -64,27 +64,33 @@ const Messages = () => {
             productId,
             productTitle,
             productImage,
+            productPrice,
           } = location.state;
 
-          // Find existing conversation with this seller
-          let conversation = data.find((conv) => conv.user.id === sellerId);
+          // Find existing conversation with this seller (mock data uses `participant`)
+          let conversation = data.find(
+            (conv) => conv.participant?.id === sellerId
+          );
 
-          // If no existing conversation, create a new one
+          // If no existing conversation, create a new one (shape matches mockConversations)
           if (!conversation) {
             conversation = {
               id: `new-${sellerId}`,
-              user: {
+              participant: {
                 id: sellerId,
                 name: sellerName,
-                avatar: sellerAvatar,
-                online: true,
+                avatar: sellerAvatar || null,
+                verified: false,
+                isOnline: true,
               },
               lastMessage: {
+                id: Date.now(),
                 text: productTitle
                   ? `Interested in: ${productTitle}`
                   : "Start a conversation",
-                time: new Date().toISOString(),
-                isOwn: false,
+                senderId: sellerId,
+                timestamp: new Date().toISOString(),
+                isRead: false,
               },
               unreadCount: 0,
               product: productId
@@ -92,11 +98,19 @@ const Messages = () => {
                     id: productId,
                     title: productTitle,
                     image: productImage,
+                    price: productPrice,
                   }
-                : null,
+                : {
+                    id: null,
+                    title: "",
+                    image: null,
+                    price: null,
+                  },
+              updatedAt: new Date().toISOString(),
             };
-            // Add to conversations list
-            setConversations([conversation, ...data]);
+
+            // Add to conversations list (prepend)
+            setConversations((prev) => [conversation, ...prev]);
           }
 
           // Auto-select this conversation

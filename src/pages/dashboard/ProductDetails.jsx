@@ -120,6 +120,7 @@ const ProductDetails = () => {
           productId: product.id,
           productTitle: product.title,
           productImage: product.image,
+          productPrice: product.price,
         },
       });
     }

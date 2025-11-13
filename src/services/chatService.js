@@ -260,6 +260,7 @@ export const chatService = {
   getMessages: (conversationId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        // Handle both numeric IDs and string IDs (for new conversations like "new-5")
         const messages = mockMessages[conversationId] || [];
         resolve(messages);
       }, 300);
@@ -279,9 +280,15 @@ export const chatService = {
           isRead: false,
         };
 
-        // Update conversation's last message (but don't add to mockMessages - that's managed by component state)
+        // Store the message in mockMessages for the conversation
+        if (!mockMessages[conversationId]) {
+          mockMessages[conversationId] = [];
+        }
+        mockMessages[conversationId].push(newMessage);
+
+        // Update conversation's last message
         const conversation = mockConversations.find(
-          (c) => c.id === parseInt(conversationId)
+          (c) => c.id === parseInt(conversationId) || c.id === conversationId
         );
         if (conversation) {
           conversation.lastMessage = newMessage;
