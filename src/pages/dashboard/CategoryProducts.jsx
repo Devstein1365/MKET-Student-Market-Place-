@@ -309,6 +309,7 @@ const CategoryProducts = () => {
                   key={product.id}
                   product={product}
                   viewMode={viewMode}
+                  onClick={() => navigate(`/dashboard/product/${product.id}`)}
                 />
               ))}
             </div>

@@ -993,7 +993,7 @@ const Search = () => {
                     <ProductCard
                       product={product}
                       onClick={() =>
-                        console.log("Product clicked:", product.id)
+                        navigate(`/dashboard/product/${product.id}`)
                       }
                     />
                   </motion.div>
