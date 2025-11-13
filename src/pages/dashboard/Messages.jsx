@@ -72,7 +72,8 @@ const Messages = () => {
             (conv) => conv.participant?.id === sellerId
           );
 
-          // If no existing conversation, create a new one (shape matches mockConversations)
+          // If no existing conversation, create a temporary one
+          // DON'T save to localStorage yet - only save when user sends first message
           if (!conversation) {
             conversation = {
               id: `new-${sellerId}`,
@@ -83,15 +84,7 @@ const Messages = () => {
                 verified: false,
                 isOnline: true,
               },
-              lastMessage: {
-                id: Date.now(),
-                text: productTitle
-                  ? `Interested in: ${productTitle}`
-                  : "Start a conversation",
-                senderId: sellerId,
-                timestamp: new Date().toISOString(),
-                isRead: false,
-              },
+              lastMessage: null, // No last message yet
               unreadCount: 0,
               product: productId
                 ? {
@@ -107,21 +100,11 @@ const Messages = () => {
                     price: null,
                   },
               updatedAt: new Date().toISOString(),
+              isTemporary: true, // Flag to indicate this is not yet saved
             };
-
-            // Add to conversations list (prepend)
-            setConversations((prev) => [conversation, ...prev]);
-
-            // Save to localStorage
-            const storedConversations =
-              JSON.parse(localStorage.getItem("mket_conversations")) || [];
-            localStorage.setItem(
-              "mket_conversations",
-              JSON.stringify([conversation, ...storedConversations])
-            );
           }
 
-          // Auto-select this conversation
+          // Auto-select this conversation (but don't add to list yet if temporary)
           setSelectedConversation(conversation);
         }
       } catch (error) {
@@ -193,6 +176,25 @@ const Messages = () => {
         text: messageInput.trim(),
         image: imagePreview,
       };
+
+      // If this is a temporary conversation (first message), save it first
+      if (selectedConversation.isTemporary) {
+        const conversationToSave = {
+          ...selectedConversation,
+          isTemporary: false, // Remove temporary flag
+        };
+
+        // Save the conversation to localStorage before sending message
+        const storedConversations =
+          JSON.parse(localStorage.getItem("mket_conversations")) || [];
+        localStorage.setItem(
+          "mket_conversations",
+          JSON.stringify([conversationToSave, ...storedConversations])
+        );
+
+        // Update selectedConversation to remove temporary flag
+        setSelectedConversation(conversationToSave);
+      }
 
       const newMessage = await chatService.sendMessage(
         selectedConversation.id,
@@ -343,9 +345,11 @@ const Messages = () => {
                             <FaCheckCircle className="text-[#14B8A6] text-xs shrink-0" />
                           )}
                         </div>
-                        <span className="text-xs text-gray-500 font-instrument shrink-0 ml-2">
-                          {formatTime(conversation.lastMessage.timestamp)}
-                        </span>
+                        {conversation.lastMessage && (
+                          <span className="text-xs text-gray-500 font-instrument shrink-0 ml-2">
+                            {formatTime(conversation.lastMessage.timestamp)}
+                          </span>
+                        )}
                       </div>
 
                       {/* Product info */}
@@ -362,16 +366,22 @@ const Messages = () => {
 
                       {/* Last message */}
                       <div className="flex items-center justify-between">
-                        <p
-                          className={`text-sm font-instrument truncate ${
-                            conversation.unreadCount > 0
-                              ? "font-semibold text-gray-900"
-                              : "text-gray-600"
-                          }`}
-                        >
-                          {conversation.lastMessage.senderId === 0 && "You: "}
-                          {conversation.lastMessage.text}
-                        </p>
+                        {conversation.lastMessage ? (
+                          <p
+                            className={`text-sm font-instrument truncate ${
+                              conversation.unreadCount > 0
+                                ? "font-semibold text-gray-900"
+                                : "text-gray-600"
+                            }`}
+                          >
+                            {conversation.lastMessage.senderId === 0 && "You: "}
+                            {conversation.lastMessage.text}
+                          </p>
+                        ) : (
+                          <p className="text-sm font-instrument text-gray-400 italic truncate">
+                            Start a conversation...
+                          </p>
+                        )}
                         {conversation.unreadCount > 0 && (
                           <div className="shrink-0 ml-2 w-5 h-5 bg-[#7E22CE] text-white rounded-full flex items-center justify-center text-xs font-inter font-bold">
                             {conversation.unreadCount}

@@ -109,7 +109,7 @@ const mockConversations = [
   {
     id: 4,
     participant: {
-      id: 5,
+      id: 7,
       name: "Chioma Nwosu",
       avatar: null,
       verified: true,
@@ -118,10 +118,9 @@ const mockConversations = [
     },
     product: {
       id: 7,
-      title: "Canon Camera DSLR",
-      image:
-        "https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400",
-      price: 280000,
+      title: "iPad Air 5th Gen 256GB - WiFi Only",
+      image: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?w=400",
+      price: 380000,
     },
     lastMessage: {
       id: 15,
@@ -229,15 +228,15 @@ const mockMessages = {
   4: [
     {
       id: 13,
-      text: "Hi! I saw your Canon camera listing.",
+      text: "Hi! I saw your iPad listing.",
       senderId: 0,
       timestamp: "2025-11-03T15:00:00Z",
       isRead: true,
     },
     {
       id: 14,
-      text: "Yes, it's a great camera!",
-      senderId: 5,
+      text: "Yes, it's a great device!",
+      senderId: 7,
       timestamp: "2025-11-03T15:10:00Z",
       isRead: true,
     },
