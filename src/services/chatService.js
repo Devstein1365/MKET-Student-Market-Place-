@@ -1,6 +1,32 @@
 // Mock Chat/Messaging Service
 // This simulates chat functionality and will be replaced with real backend + WebSocket later
 
+// Storage keys
+const STORAGE_KEYS = {
+  CONVERSATIONS: "mket_conversations",
+  MESSAGES: "mket_messages",
+};
+
+// Load from localStorage or use defaults
+const loadFromStorage = (key, defaultValue) => {
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : defaultValue;
+  } catch (error) {
+    console.error("Error loading from storage:", error);
+    return defaultValue;
+  }
+};
+
+// Save to localStorage
+const saveToStorage = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error("Error saving to storage:", error);
+  }
+};
+
 const mockConversations = [
   {
     id: 1,
@@ -231,11 +257,31 @@ export const chatService = {
   getAllConversations: () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(
-          [...mockConversations].sort(
-            (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
-          )
+        // Load stored conversations from localStorage
+        const storedConversations = loadFromStorage(
+          STORAGE_KEYS.CONVERSATIONS,
+          []
         );
+
+        // Merge with mock conversations (prioritize stored ones)
+        const mergedConversations = [...storedConversations];
+
+        // Add mock conversations that don't exist in stored
+        mockConversations.forEach((mockConv) => {
+          const exists = storedConversations.some(
+            (stored) => stored.id === mockConv.id
+          );
+          if (!exists) {
+            mergedConversations.push(mockConv);
+          }
+        });
+
+        // Sort by most recent
+        const sorted = mergedConversations.sort(
+          (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+        );
+
+        resolve(sorted);
       }, 300);
     });
   },
@@ -260,8 +306,12 @@ export const chatService = {
   getMessages: (conversationId) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Handle both numeric IDs and string IDs (for new conversations like "new-5")
-        const messages = mockMessages[conversationId] || [];
+        // Load stored messages
+        const allMessages = loadFromStorage(STORAGE_KEYS.MESSAGES, {});
+
+        // Check stored messages first, then fall back to mock
+        const messages =
+          allMessages[conversationId] || mockMessages[conversationId] || [];
         resolve(messages);
       }, 300);
     });
@@ -280,20 +330,58 @@ export const chatService = {
           isRead: false,
         };
 
-        // Store the message in mockMessages for the conversation
-        if (!mockMessages[conversationId]) {
-          mockMessages[conversationId] = [];
-        }
-        mockMessages[conversationId].push(newMessage);
+        // Load all messages from storage
+        const allMessages = loadFromStorage(STORAGE_KEYS.MESSAGES, {});
 
-        // Update conversation's last message
-        const conversation = mockConversations.find(
-          (c) => c.id === parseInt(conversationId) || c.id === conversationId
-        );
-        if (conversation) {
-          conversation.lastMessage = newMessage;
-          conversation.updatedAt = newMessage.timestamp;
+        // Store the message in the conversation's messages
+        if (!allMessages[conversationId]) {
+          allMessages[conversationId] = [];
         }
+        allMessages[conversationId].push(newMessage);
+
+        // Save messages to localStorage
+        saveToStorage(STORAGE_KEYS.MESSAGES, allMessages);
+
+        // Update the conversation's last message in stored conversations
+        const storedConversations = loadFromStorage(
+          STORAGE_KEYS.CONVERSATIONS,
+          []
+        );
+
+        const updatedConversations = storedConversations.map((conv) =>
+          conv.id === conversationId ||
+          String(conv.id) === String(conversationId)
+            ? {
+                ...conv,
+                lastMessage: newMessage,
+                updatedAt: newMessage.timestamp,
+              }
+            : conv
+        );
+
+        // If conversation doesn't exist in stored, find it in mock and update
+        const convExists = storedConversations.some(
+          (conv) =>
+            conv.id === conversationId ||
+            String(conv.id) === String(conversationId)
+        );
+
+        if (!convExists) {
+          const mockConv = mockConversations.find(
+            (c) =>
+              c.id === conversationId || String(c.id) === String(conversationId)
+          );
+          if (mockConv) {
+            updatedConversations.push({
+              ...mockConv,
+              lastMessage: newMessage,
+              updatedAt: newMessage.timestamp,
+            });
+          }
+        }
+
+        // Save conversations to localStorage
+        saveToStorage(STORAGE_KEYS.CONVERSATIONS, updatedConversations);
 
         resolve(newMessage);
       }, 300);

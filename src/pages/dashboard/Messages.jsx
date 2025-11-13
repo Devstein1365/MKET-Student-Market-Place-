@@ -111,6 +111,14 @@ const Messages = () => {
 
             // Add to conversations list (prepend)
             setConversations((prev) => [conversation, ...prev]);
+
+            // Save to localStorage
+            const storedConversations =
+              JSON.parse(localStorage.getItem("mket_conversations")) || [];
+            localStorage.setItem(
+              "mket_conversations",
+              JSON.stringify([conversation, ...storedConversations])
+            );
           }
 
           // Auto-select this conversation
@@ -195,20 +203,33 @@ const Messages = () => {
       setMessageInput("");
       setImagePreview(null);
 
-      // Update conversation list
+      // Update conversation list and also update the selected conversation
       setConversations((prev) =>
         prev
           .map((conv) =>
             conv.id === selectedConversation.id
               ? {
                   ...conv,
-                  lastMessage: newMessage,
+                  lastMessage: {
+                    ...newMessage,
+                    text: newMessage.text,
+                  },
                   updatedAt: newMessage.timestamp,
                 }
               : conv
           )
           .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
       );
+
+      // Also update the selectedConversation so it shows in the sidebar
+      setSelectedConversation((prev) => ({
+        ...prev,
+        lastMessage: {
+          ...newMessage,
+          text: newMessage.text,
+        },
+        updatedAt: newMessage.timestamp,
+      }));
     } catch (error) {
       console.error("Error sending message:", error);
       showModal("Error", "Failed to send message. Please try again.", "error");
