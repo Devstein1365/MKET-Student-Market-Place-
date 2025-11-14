@@ -15,18 +15,12 @@ const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
         <FaEnvelope className="text-gray-400 mt-1 shrink-0" />
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-500 font-instrument">Email</p>
-          {isEditMode ? (
-            <input
-              type="email"
-              value={profileData.email}
-              onChange={(e) =>
-                onEdit({ ...profileData, email: e.target.value })
-              }
-              className="w-full text-sm text-gray-900 font-instrument border-b border-gray-300 focus:outline-none focus:border-[#7E22CE]"
-            />
-          ) : (
-            <p className="text-sm text-gray-900 font-instrument truncate">
-              {profileData.email}
+          <p className="text-sm text-gray-900 font-instrument truncate">
+            {profileData.email}
+          </p>
+          {isEditMode && (
+            <p className="text-xs text-gray-400 font-instrument mt-1">
+              Email cannot be changed
             </p>
           )}
         </div>
@@ -44,11 +38,14 @@ const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
               onChange={(e) =>
                 onEdit({ ...profileData, phone: e.target.value })
               }
+              placeholder="Add phone number"
               className="w-full text-sm text-gray-900 font-instrument border-b border-gray-300 focus:outline-none focus:border-[#7E22CE]"
             />
           ) : (
             <p className="text-sm text-gray-900 font-instrument">
-              {profileData.phone}
+              {profileData.phone || (
+                <span className="text-gray-400 italic">Not provided</span>
+              )}
             </p>
           )}
         </div>
@@ -66,6 +63,7 @@ const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
               onChange={(e) =>
                 onEdit({ ...profileData, location: e.target.value })
               }
+              placeholder="Select location"
               options={[
                 { value: "Bosso Campus", label: "Bosso Campus" },
                 { value: "Gidan Kwano", label: "Gidan Kwano" },
@@ -76,7 +74,9 @@ const ContactInfo = ({ profileData, isEditMode, onEdit, formatDate }) => {
             />
           ) : (
             <p className="text-sm text-gray-900 font-instrument">
-              {profileData.location}
+              {profileData.location || (
+                <span className="text-gray-400 italic">Not provided</span>
+              )}
             </p>
           )}
         </div>

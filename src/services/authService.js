@@ -41,7 +41,7 @@ class AuthService {
         email: userData.email,
         password: userData.password, // In production, hash this!
         phone: userData.phone || "",
-        location: "Bosso Campus", // Default location
+        location: userData.location || "", // Empty by default, user can update later
         bio: "",
         avatar: null,
         verified: false,

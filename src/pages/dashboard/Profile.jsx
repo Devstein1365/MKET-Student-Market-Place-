@@ -24,7 +24,7 @@ const Profile = () => {
     name: user?.name || "",
     email: user?.email || "",
     phone: user?.phone || "",
-    location: user?.location || "Bosso Campus",
+    location: user?.location || "",
     bio: user?.bio || "",
     avatar: user?.avatar || null,
     verified: user?.verified || false,
