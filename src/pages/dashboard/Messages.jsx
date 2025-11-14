@@ -36,6 +36,7 @@ const Messages = () => {
   });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
+  const [showQuickReplies, setShowQuickReplies] = useState(false);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const optionsMenuRef = useRef(null);
@@ -121,6 +122,11 @@ const Messages = () => {
 
           // Auto-select this conversation (but don't add to list yet if temporary)
           setSelectedConversation(conversation);
+
+          // Show quick replies only for NEW conversations from "Chat with Seller"
+          if (!conversation.lastMessage && productId) {
+            setShowQuickReplies(true);
+          }
         }
       } catch (error) {
         console.error("Error loading conversations:", error);
@@ -186,6 +192,10 @@ const Messages = () => {
     if (!messageInput.trim() && !imagePreview) return;
 
     setSending(true);
+
+    // Hide quick replies when user sends a message
+    setShowQuickReplies(false);
+
     try {
       const messageData = {
         text: messageInput.trim(),
@@ -250,6 +260,18 @@ const Messages = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const handleQuickReply = (message) => {
+    setMessageInput(message);
+    setShowQuickReplies(false);
+    // Auto-focus the input after selecting quick reply
+    setTimeout(() => {
+      const textarea = document.querySelector(
+        'textarea[placeholder="Type a message..."]'
+      );
+      if (textarea) textarea.focus();
+    }, 100);
   };
 
   const handleViewProduct = () => {
@@ -701,6 +723,67 @@ const Messages = () => {
                 </motion.div>
               );
             })}
+
+            {/* Quick Reply Suggestions - Only show for new conversations */}
+            {showQuickReplies && messages.length === 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                className="space-y-3"
+              >
+                <div className="flex items-center gap-2 text-gray-500 text-xs font-instrument mb-2">
+                  <div className="h-px flex-1 bg-gray-300"></div>
+                  <span>Quick replies</span>
+                  <div className="h-px flex-1 bg-gray-300"></div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() =>
+                      handleQuickReply("Hello! Is this still available?")
+                    }
+                    className="px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-full font-instrument text-sm hover:bg-[#7E22CE] hover:text-white transition-all duration-200 shadow-sm"
+                  >
+                    Is this still available?
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleQuickReply("Hi! What's the condition of the item?")
+                    }
+                    className="px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-full font-instrument text-sm hover:bg-[#7E22CE] hover:text-white transition-all duration-200 shadow-sm"
+                  >
+                    What's the condition?
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleQuickReply("Can we negotiate the price?")
+                    }
+                    className="px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-full font-instrument text-sm hover:bg-[#7E22CE] hover:text-white transition-all duration-200 shadow-sm"
+                  >
+                    Can we negotiate?
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleQuickReply("Where can we meet for the exchange?")
+                    }
+                    className="px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-full font-instrument text-sm hover:bg-[#7E22CE] hover:text-white transition-all duration-200 shadow-sm"
+                  >
+                    Where can we meet?
+                  </button>
+                  <button
+                    onClick={() =>
+                      handleQuickReply(
+                        "I'm interested! Can I get more details?"
+                      )
+                    }
+                    className="px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-full font-instrument text-sm hover:bg-[#7E22CE] hover:text-white transition-all duration-200 shadow-sm"
+                  >
+                    More details please
+                  </button>
+                </div>
+              </motion.div>
+            )}
+
             <div ref={messagesEndRef} />
           </div>
 
@@ -742,7 +825,13 @@ const Messages = () => {
               <div className="flex-1">
                 <textarea
                   value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
+                  onChange={(e) => {
+                    setMessageInput(e.target.value);
+                    // Hide quick replies when user starts typing manually
+                    if (e.target.value.length > 0 && showQuickReplies) {
+                      setShowQuickReplies(false);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
                       e.preventDefault();
