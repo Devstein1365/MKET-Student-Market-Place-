@@ -55,7 +55,7 @@ const CategoryGrid = () => {
   };
 
   return (
-    <section className="relative">
+    <section className="relative overflow-hidden">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xl font-inter font-bold text-[#111827] flex items-center gap-2">
           <FaTags className="text-[#7E22CE]" />
@@ -69,23 +69,23 @@ const CategoryGrid = () => {
         </Link>
       </div>
 
-      <div className="relative group">
-        {/* Left Arrow */}
+      <div className="relative">
+        {/* Left Arrow - Always visible when there's content to scroll */}
         {showLeftArrow && (
           <button
             onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 rounded-full p-2 shadow-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg border border-gray-200 transition-all hover:scale-110"
             aria-label="Scroll left"
           >
             <FaChevronLeft className="text-[#7E22CE]" />
           </button>
         )}
 
-        {/* Right Arrow */}
+        {/* Right Arrow - Always visible when there's content to scroll */}
         {showRightArrow && (
           <button
             onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 rounded-full p-2 shadow-lg border border-gray-200 opacity-0 group-hover:opacity-100 transition-opacity"
+            className="absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white hover:bg-gray-50 rounded-full p-3 shadow-lg border border-gray-200 transition-all hover:scale-110"
             aria-label="Scroll right"
           >
             <FaChevronRight className="text-[#7E22CE]" />
@@ -95,7 +95,7 @@ const CategoryGrid = () => {
         {/* Scrollable Container */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 overflow-x-auto scrollbar-hide scroll-smooth pb-2"
+          className="flex gap-3 overflow-x-scroll scrollbar-hide scroll-smooth pb-2 px-1"
           style={{
             scrollbarWidth: "none",
             msOverflowStyle: "none",
