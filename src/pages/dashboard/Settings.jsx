@@ -26,11 +26,6 @@ const Settings = () => {
     updates: false,
   });
 
-  // Theme state (dark, light, system)
-  const [theme, setTheme] = useState(() => {
-    return localStorage.getItem("mket_theme") || "system";
-  });
-
   // Change password state
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordData, setPasswordData] = useState({
@@ -62,40 +57,6 @@ const Settings = () => {
 
   const closeModal = () => {
     setModal({ ...modal, isOpen: false });
-  };
-
-  // Apply theme
-  React.useEffect(() => {
-    const applyTheme = () => {
-      const root = window.document.documentElement;
-
-      if (theme === "system") {
-        const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-          .matches
-          ? "dark"
-          : "light";
-        root.classList.remove("light", "dark");
-        root.classList.add(systemTheme);
-      } else {
-        root.classList.remove("light", "dark");
-        root.classList.add(theme);
-      }
-    };
-
-    applyTheme();
-    localStorage.setItem("mket_theme", theme);
-
-    // Listen for system theme changes
-    if (theme === "system") {
-      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      const handleChange = () => applyTheme();
-      mediaQuery.addEventListener("change", handleChange);
-      return () => mediaQuery.removeEventListener("change", handleChange);
-    }
-  }, [theme]);
-
-  const handleThemeChange = (newTheme) => {
-    setTheme(newTheme);
   };
 
   const handleChangePassword = () => {
@@ -238,11 +199,9 @@ const Settings = () => {
         {
           icon: FaPalette,
           label: "Theme",
-          description: `Current: ${
-            theme.charAt(0).toUpperCase() + theme.slice(1)
-          }`,
-          hasSubmenu: true,
-          theme: true,
+          description: "Light / Dark mode (Coming Soon)",
+          action: () =>
+            showModal("Coming Soon", "Theme options coming soon!", "info"),
         },
         {
           icon: FaLanguage,
@@ -298,11 +257,9 @@ const Settings = () => {
                 {section.items.map((item, index) => (
                   <div
                     key={index}
-                    onClick={
-                      item.toggle || item.theme ? undefined : item.action
-                    }
+                    onClick={item.toggle ? undefined : item.action}
                     className={`${
-                      !item.toggle && !item.theme
+                      !item.toggle
                         ? "cursor-pointer hover:bg-gray-50 transition-colors"
                         : ""
                     }`}
@@ -332,36 +289,10 @@ const Settings = () => {
                             <FaToggleOff className="text-gray-400" />
                           )}
                         </button>
-                      ) : item.theme ? null : (
+                      ) : (
                         <FaChevronRight className="text-gray-400" />
                       )}
                     </div>
-
-                    {/* Theme Selection */}
-                    {item.theme && (
-                      <div className="px-4 pb-4 space-y-2">
-                        {["light", "dark", "system"].map((themeOption) => (
-                          <button
-                            key={themeOption}
-                            onClick={() => handleThemeChange(themeOption)}
-                            className={`w-full flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
-                              theme === themeOption
-                                ? "border-[#7E22CE] bg-[#7E22CE]/5"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                          >
-                            <span className="font-instrument font-medium text-gray-900 capitalize">
-                              {themeOption}
-                            </span>
-                            {theme === themeOption && (
-                              <div className="w-5 h-5 rounded-full bg-[#7E22CE] flex items-center justify-center">
-                                <div className="w-2 h-2 rounded-full bg-white"></div>
-                              </div>
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
