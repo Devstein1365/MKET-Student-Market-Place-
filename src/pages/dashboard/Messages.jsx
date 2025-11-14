@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaSearch,
@@ -20,6 +20,7 @@ import Modal from "../../components/shared/Modal";
 
 const Messages = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -28,8 +29,16 @@ const Messages = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const [blockedUsers, setBlockedUsers] = useState(() => {
+    const stored = localStorage.getItem("mket_blocked_users");
+    return stored ? JSON.parse(stored) : [];
+  });
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [confirmAction, setConfirmAction] = useState(null);
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
+  const optionsMenuRef = useRef(null);
 
   // Modal state
   const [modal, setModal] = useState({
@@ -53,7 +62,13 @@ const Messages = () => {
       setLoading(true);
       try {
         const data = await chatService.getAllConversations();
-        setConversations(data);
+
+        // Filter out blocked users
+        const filteredData = data.filter(
+          (conv) => !blockedUsers.includes(conv.participant?.id)
+        );
+
+        setConversations(filteredData);
 
         // Check if we came from "Chat with Seller" button
         if (location.state?.sellerId) {
@@ -115,7 +130,7 @@ const Messages = () => {
     };
 
     loadConversations();
-  }, [location.state]);
+  }, [location.state, blockedUsers]);
 
   // Load messages when conversation is selected
   useEffect(() => {
@@ -236,6 +251,125 @@ const Messages = () => {
       reader.readAsDataURL(file);
     }
   };
+
+  const handleViewProduct = () => {
+    if (selectedConversation?.product?.id) {
+      navigate(`/dashboard/product/${selectedConversation.product.id}`);
+    }
+  };
+
+  const handleViewProfile = () => {
+    if (selectedConversation?.participant?.id) {
+      navigate(`/dashboard/profile/${selectedConversation.participant.id}`);
+      setShowOptionsMenu(false);
+    }
+  };
+
+  const handleBlockUser = () => {
+    setConfirmAction({
+      type: "block",
+      title: "Block User",
+      message: `Are you sure you want to block ${selectedConversation?.participant?.name}? You won't receive messages from this user anymore.`,
+      onConfirm: () => {
+        const userId = selectedConversation.participant.id;
+        const updatedBlockedUsers = [...blockedUsers, userId];
+        setBlockedUsers(updatedBlockedUsers);
+        localStorage.setItem(
+          "mket_blocked_users",
+          JSON.stringify(updatedBlockedUsers)
+        );
+
+        // Remove conversation from list
+        setConversations((prev) =>
+          prev.filter((conv) => conv.participant.id !== userId)
+        );
+        setSelectedConversation(null);
+        setShowConfirmModal(false);
+        showModal(
+          "User Blocked",
+          `${selectedConversation?.participant?.name} has been blocked successfully.`,
+          "success"
+        );
+      },
+    });
+    setShowConfirmModal(true);
+    setShowOptionsMenu(false);
+  };
+
+  const handleReportUser = () => {
+    // TODO: Implement report user functionality
+    showModal(
+      "Report User",
+      "Report functionality will be implemented soon.",
+      "info"
+    );
+    setShowOptionsMenu(false);
+  };
+
+  const handleDeleteConversation = () => {
+    setConfirmAction({
+      type: "delete",
+      title: "Delete Conversation",
+      message: `Are you sure you want to delete this conversation with ${selectedConversation?.participant?.name}? This action cannot be undone.`,
+      onConfirm: () => {
+        const conversationId = selectedConversation.id;
+
+        // Remove from localStorage
+        const storedConversations = JSON.parse(
+          localStorage.getItem("mket_conversations") || "[]"
+        );
+        const updatedConversations = storedConversations.filter(
+          (conv) =>
+            conv.id !== conversationId &&
+            String(conv.id) !== String(conversationId)
+        );
+        localStorage.setItem(
+          "mket_conversations",
+          JSON.stringify(updatedConversations)
+        );
+
+        // Remove messages from localStorage
+        const storedMessages = JSON.parse(
+          localStorage.getItem("mket_messages") || "{}"
+        );
+        delete storedMessages[conversationId];
+        localStorage.setItem("mket_messages", JSON.stringify(storedMessages));
+
+        // Remove from state
+        setConversations((prev) =>
+          prev.filter(
+            (conv) =>
+              conv.id !== conversationId &&
+              String(conv.id) !== String(conversationId)
+          )
+        );
+        setSelectedConversation(null);
+        setShowConfirmModal(false);
+        showModal(
+          "Conversation Deleted",
+          "The conversation has been deleted successfully.",
+          "success"
+        );
+      },
+    });
+    setShowConfirmModal(true);
+    setShowOptionsMenu(false);
+  };
+
+  // Close options menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        optionsMenuRef.current &&
+        !optionsMenuRef.current.contains(event.target)
+      ) {
+        setShowOptionsMenu(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const formatTime = (timestamp) => {
     const date = new Date(timestamp);
@@ -437,35 +571,82 @@ const Messages = () => {
                 </p>
               </div>
             </div>
-            <button className="text-gray-600 hover:text-gray-900">
-              <FaEllipsisV />
-            </button>
-          </div>
+            <div className="relative" ref={optionsMenuRef}>
+              <button
+                onClick={() => setShowOptionsMenu(!showOptionsMenu)}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <FaEllipsisV />
+              </button>
 
-          {/* Product Context Banner */}
-          <div className="p-3 bg-gray-50 border-b border-gray-200">
-            <div className="flex items-center gap-3">
-              <img
-                src={selectedConversation.product.image}
-                alt={selectedConversation.product.title}
-                className="w-12 h-12 rounded-lg object-cover"
-              />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-instrument font-semibold text-gray-900 truncate">
-                  {selectedConversation.product.title}
-                </p>
-                <p className="text-sm font-inter font-bold text-[#7E22CE]">
-                  ₦
-                  {parseInt(
-                    selectedConversation.product.price
-                  ).toLocaleString()}
-                </p>
-              </div>
-              <Button size="sm" variant="outline">
-                View
-              </Button>
+              {/* Options Dropdown Menu */}
+              {showOptionsMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+                >
+                  <button
+                    onClick={handleViewProfile}
+                    className="w-full px-4 py-2 text-left text-sm font-instrument text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    View Profile
+                  </button>
+                  <button
+                    onClick={handleDeleteConversation}
+                    className="w-full px-4 py-2 text-left text-sm font-instrument text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    Delete Conversation
+                  </button>
+                  <button
+                    onClick={handleBlockUser}
+                    className="w-full px-4 py-2 text-left text-sm font-instrument text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Block User
+                  </button>
+                  <button
+                    onClick={handleReportUser}
+                    className="w-full px-4 py-2 text-left text-sm font-instrument text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    Report User
+                  </button>
+                </motion.div>
+              )}
             </div>
           </div>
+
+          {/* Product Context Banner - Only show if there's a product */}
+          {selectedConversation.product?.id &&
+            selectedConversation.product?.price && (
+              <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <div className="flex items-center gap-3">
+                  <img
+                    src={selectedConversation.product.image}
+                    alt={selectedConversation.product.title}
+                    className="w-12 h-12 rounded-lg object-cover"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-instrument font-semibold text-gray-900 truncate">
+                      {selectedConversation.product.title}
+                    </p>
+                    <p className="text-sm font-inter font-bold text-[#7E22CE]">
+                      ₦
+                      {parseInt(
+                        selectedConversation.product.price
+                      ).toLocaleString()}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={handleViewProduct}
+                  >
+                    View
+                  </Button>
+                </div>
+              </div>
+            )}
 
           {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
@@ -617,6 +798,41 @@ const Messages = () => {
         message={modal.message}
         type={modal.type}
       />
+
+      {/* Confirmation Modal for Block/Delete */}
+      {showConfirmModal && confirmAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-xl"
+          >
+            <h3 className="text-xl font-inter font-bold text-gray-900 mb-3">
+              {confirmAction.title}
+            </h3>
+            <p className="text-gray-600 font-instrument mb-6">
+              {confirmAction.message}
+            </p>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                variant={confirmAction.type === "block" ? "danger" : "primary"}
+                onClick={confirmAction.onConfirm}
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                {confirmAction.type === "block" ? "Block" : "Delete"}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 };
