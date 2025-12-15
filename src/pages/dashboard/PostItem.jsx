@@ -52,6 +52,7 @@ const PostItem = () => {
   const [drafts, setDrafts] = useState([]);
   const [showDrafts, setShowDrafts] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [lastSavedDraft, setLastSavedDraft] = useState(null); // Track last saved state
 
   // Modal state
   const [modal, setModal] = useState({
@@ -102,6 +103,26 @@ const PostItem = () => {
     );
   };
 
+  // Check if content has changed since last save
+  const hasChangedSinceLastSave = () => {
+    if (!lastSavedDraft) return true; // No previous save, so it's changed
+
+    // Compare form data
+    const formChanged =
+      JSON.stringify(formData) !== JSON.stringify(lastSavedDraft.formData);
+
+    // Compare images (only IDs and previews)
+    const currentImageData = images.map((img) => ({
+      id: img.id,
+      preview: img.preview,
+    }));
+    const imagesChanged =
+      JSON.stringify(currentImageData) !==
+      JSON.stringify(lastSavedDraft.images);
+
+    return formChanged || imagesChanged;
+  };
+
   // Save draft
   const saveDraft = (silent = false) => {
     if (!hasContent()) {
@@ -115,14 +136,30 @@ const PostItem = () => {
       return;
     }
 
+    // Check if content has changed since last save
+    if (!hasChangedSinceLastSave()) {
+      if (!silent) {
+        showModal(
+          "No Changes",
+          "No changes detected since last save.",
+          "info"
+        );
+      }
+      return;
+    }
+
     try {
-      const draft = {
-        id: currentDraftId || Date.now().toString(),
+      const draftData = {
         formData,
         images: images.map((img) => ({
           id: img.id,
           preview: img.preview,
         })),
+      };
+
+      const draft = {
+        id: currentDraftId || `draft_${Date.now()}`,
+        ...draftData,
         timestamp: Date.now(),
       };
 
@@ -130,9 +167,34 @@ const PostItem = () => {
       const existingIndex = savedDrafts.findIndex((d) => d.id === draft.id);
 
       if (existingIndex >= 0) {
+        // Update existing draft
         savedDrafts[existingIndex] = draft;
       } else {
-        savedDrafts.unshift(draft);
+        // Check if similar draft exists (same title)
+        const similarDraftIndex = savedDrafts.findIndex(
+          (d) =>
+            d.formData.title &&
+            d.formData.title.toLowerCase().trim() ===
+              formData.title.toLowerCase().trim()
+        );
+
+        if (similarDraftIndex >= 0 && !currentDraftId) {
+          // Ask user if they want to update the similar draft
+          if (!silent) {
+            showModal(
+              "Similar Draft Exists",
+              `A draft with the title "${formData.title}" already exists. The existing draft has been updated.`,
+              "info"
+            );
+          }
+          // Update the similar draft
+          draft.id = savedDrafts[similarDraftIndex].id;
+          savedDrafts[similarDraftIndex] = draft;
+          setCurrentDraftId(draft.id);
+        } else {
+          // Add new draft at the beginning
+          savedDrafts.unshift(draft);
+        }
       }
 
       // Keep only last 10 drafts
@@ -141,6 +203,7 @@ const PostItem = () => {
 
       setCurrentDraftId(draft.id);
       setDrafts(limitedDrafts);
+      setLastSavedDraft(draftData); // Update last saved state
 
       if (!silent) {
         showModal(
@@ -166,6 +229,10 @@ const PostItem = () => {
     setFormData(draft.formData);
     setImages(draft.images);
     setCurrentDraftId(draft.id);
+    setLastSavedDraft({
+      formData: draft.formData,
+      images: draft.images,
+    }); // Set last saved state when loading
     setShowDrafts(false);
     showModal(
       "Draft Loaded",
@@ -207,6 +274,7 @@ const PostItem = () => {
     setImages([]);
     setCurrentDraftId(null);
     setErrors({});
+    setLastSavedDraft(null); // Clear last saved state
   };
 
   const showModal = (title, message, type = "info") => {
