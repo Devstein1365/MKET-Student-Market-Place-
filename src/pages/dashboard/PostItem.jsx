@@ -14,6 +14,8 @@ import {
   FaEye,
   FaTrash,
   FaFileAlt,
+  FaPaperPlane,
+  FaBan,
 } from "react-icons/fa";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
@@ -768,39 +770,38 @@ const PostItem = () => {
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <Button
+        <div className="grid grid-cols-4 gap-2 sm:gap-3">
+          <button
             type="button"
-            variant="outline"
-            size="lg"
-            className="flex-1"
             onClick={() => window.history.back()}
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg font-inter font-medium hover:bg-gray-50 transition-all"
           >
-            Cancel
-          </Button>
-          <Button
+            <FaBan className="text-lg sm:text-base" />
+            <span className="text-xs sm:text-sm">Cancel</span>
+          </button>
+          <button
             type="button"
-            variant="outline"
-            size="lg"
-            className="flex-1 flex items-center justify-center gap-2"
             onClick={() => saveDraft(false)}
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:py-2.5 border-2 border-[#7E22CE] text-[#7E22CE] rounded-lg font-inter font-medium hover:bg-[#7E22CE] hover:text-white transition-all"
           >
-            <FaSave />
-            Save Draft
-          </Button>
-          <Button
+            <FaSave className="text-lg sm:text-base" />
+            <span className="text-xs sm:text-sm">Draft</span>
+          </button>
+          <button
             type="button"
-            variant="outline"
-            size="lg"
-            className="flex-1 flex items-center justify-center gap-2 border-[#7E22CE] text-[#7E22CE] hover:bg-[#7E22CE] hover:text-white"
             onClick={handlePreview}
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:py-2.5 border-2 border-[#14B8A6] text-[#14B8A6] rounded-lg font-inter font-medium hover:bg-[#14B8A6] hover:text-white transition-all"
           >
-            <FaEye />
-            Preview
-          </Button>
-          <Button type="submit" variant="primary" size="lg" className="flex-1">
-            Post Item
-          </Button>
+            <FaEye className="text-lg sm:text-base" />
+            <span className="text-xs sm:text-sm">Preview</span>
+          </button>
+          <button
+            type="submit"
+            className="flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-3 py-3 sm:py-2.5 bg-gradient-to-r from-[#7E22CE] to-[#14B8A6] text-white rounded-lg font-inter font-medium hover:shadow-lg transition-all"
+          >
+            <FaPaperPlane className="text-lg sm:text-base" />
+            <span className="text-xs sm:text-sm">Post</span>
+          </button>
         </div>
       </form>
 
@@ -869,9 +870,9 @@ const PostItem = () => {
         onClose={() => setShowPreview(false)}
         title="Preview Your Listing"
       >
-        <div className="space-y-4">
+        <div className="space-y-4 max-h-[70vh] overflow-y-auto">
           {/* Preview Images */}
-          {images.length > 0 && (
+          {images.length > 0 ? (
             <div className="relative h-64 bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src={images[0].preview}
@@ -884,23 +885,30 @@ const PostItem = () => {
                 </div>
               )}
             </div>
+          ) : (
+            <div className="h-64 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="text-center">
+                <FaImage className="text-5xl text-gray-300 mx-auto mb-2" />
+                <p className="text-gray-400 font-instrument">No images</p>
+              </div>
+            </div>
           )}
 
           {/* Preview Details */}
           <div className="space-y-3">
             <div>
               <h2 className="text-xl font-inter font-bold text-[#111827] mb-1">
-                {formData.title}
+                {formData.title || "No title"}
               </h2>
               <div className="flex items-center gap-2 text-sm text-[#6B7280] font-instrument">
                 <FaMapMarkerAlt className="text-[#7E22CE]" />
-                <span>{formData.location}</span>
+                <span>{formData.location || "No location"}</span>
               </div>
             </div>
 
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-inter font-bold text-[#7E22CE]">
-                ₦{formData.price}
+                ₦{formData.price || "0"}
               </span>
               {formData.originalPrice && (
                 <span className="text-sm text-[#6B7280] line-through font-instrument">
@@ -910,9 +918,11 @@ const PostItem = () => {
             </div>
 
             <div className="flex flex-wrap gap-2">
-              <span className="px-3 py-1 bg-[#7E22CE]/10 text-[#7E22CE] rounded-full text-sm font-inter">
-                {categoriesData.find((c) => c.id === formData.category)?.name}
-              </span>
+              {formData.category && (
+                <span className="px-3 py-1 bg-[#7E22CE]/10 text-[#7E22CE] rounded-full text-sm font-inter">
+                  {categoriesData.find((c) => c.id === formData.category)?.name || formData.category}
+                </span>
+              )}
               <span className="px-3 py-1 bg-gray-100 text-[#4B5563] rounded-full text-sm font-inter">
                 {formData.condition}
               </span>
@@ -923,13 +933,13 @@ const PostItem = () => {
                 Description
               </h3>
               <p className="text-[#4B5563] font-instrument whitespace-pre-wrap">
-                {formData.description}
+                {formData.description || "No description provided"}
               </p>
             </div>
           </div>
 
           {/* Preview Actions */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4 border-t sticky bottom-0 bg-white">
             <Button
               variant="outline"
               size="lg"

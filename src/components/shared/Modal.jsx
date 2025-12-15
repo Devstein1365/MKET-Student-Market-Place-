@@ -18,6 +18,8 @@ const Modal = ({
   cancelText = "Cancel",
   onConfirm,
   showCancel = false,
+  children, // Support for custom content
+  hideDefaultContent = false, // Hide default icon/message layout
 }) => {
   const getIcon = () => {
     switch (type) {
@@ -81,42 +83,54 @@ const Modal = ({
 
               {/* Body */}
               <div className="px-6 py-8">
-                <div className="flex flex-col items-center text-center">
-                  {/* Icon */}
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 0.1, type: "spring" }}
-                    className="mb-4"
-                  >
-                    {getIcon()}
-                  </motion.div>
+                {children ? (
+                  // Custom content
+                  <div>{children}</div>
+                ) : hideDefaultContent ? null : (
+                  // Default content with icon and message
+                  <div className="flex flex-col items-center text-center">
+                    {/* Icon */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 0.1, type: "spring" }}
+                      className="mb-4"
+                    >
+                      {getIcon()}
+                    </motion.div>
 
-                  {/* Message */}
-                  <p className="text-gray-700 font-instrument text-lg leading-relaxed">
-                    {message}
-                  </p>
-                </div>
+                    {/* Message */}
+                    <p className="text-gray-700 font-instrument text-lg leading-relaxed">
+                      {message}
+                    </p>
+                  </div>
+                )}
               </div>
 
-              {/* Footer */}
-              <div className="px-6 pb-6">
-                <div className="flex gap-3">
-                  {showCancel && (
+              {/* Footer - Only show if not using custom children */}
+              {!children && (
+                <div className="px-6 pb-6">
+                  <div className="flex gap-3">
+                    {showCancel && (
+                      <Button
+                        variant="outline"
+                        fullWidth
+                        onClick={onClose}
+                        className="flex-1"
+                      >
+                        {cancelText}
+                      </Button>
+                    )}
                     <Button
-                      variant="outline"
                       fullWidth
-                      onClick={onClose}
+                      onClick={handleConfirm}
                       className="flex-1"
                     >
-                      {cancelText}
+                      {confirmText}
                     </Button>
-                  )}
-                  <Button fullWidth onClick={handleConfirm} className="flex-1">
-                    {confirmText}
-                  </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </motion.div>
           </div>
         </>
