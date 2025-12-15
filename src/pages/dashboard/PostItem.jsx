@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaImage,
@@ -10,6 +10,10 @@ import {
   FaDollarSign,
   FaMagic,
   FaSpinner,
+  FaSave,
+  FaEye,
+  FaTrash,
+  FaFileAlt,
 } from "react-icons/fa";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
@@ -24,6 +28,8 @@ import {
   toKobo,
   cleanNumber,
 } from "../../utils/price";
+
+const DRAFTS_KEY = "mket_drafts";
 
 const PostItem = () => {
   const [images, setImages] = useState([]);
@@ -40,6 +46,10 @@ const PostItem = () => {
   });
   const [errors, setErrors] = useState({});
   const [isGenerating, setIsGenerating] = useState(false);
+  const [currentDraftId, setCurrentDraftId] = useState(null);
+  const [drafts, setDrafts] = useState([]);
+  const [showDrafts, setShowDrafts] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Modal state
   const [modal, setModal] = useState({
@@ -48,6 +58,154 @@ const PostItem = () => {
     message: "",
     type: "info",
   });
+
+  // Load drafts on mount
+  useEffect(() => {
+    loadDrafts();
+  }, []);
+
+  // Auto-save draft every 30 seconds if there's content
+  useEffect(() => {
+    const autoSaveInterval = setInterval(() => {
+      if (hasContent() && !showPreview) {
+        saveDraft(true); // silent save
+      }
+    }, 30000); // 30 seconds
+
+    return () => clearInterval(autoSaveInterval);
+  }, [formData, images]);
+
+  // Load drafts from localStorage
+  const loadDrafts = () => {
+    try {
+      const savedDrafts = localStorage.getItem(DRAFTS_KEY);
+      if (savedDrafts) {
+        setDrafts(JSON.parse(savedDrafts));
+      }
+    } catch (error) {
+      console.error("Error loading drafts:", error);
+    }
+  };
+
+  // Check if form has any content
+  const hasContent = () => {
+    return (
+      formData.title.trim() ||
+      formData.description.trim() ||
+      formData.price ||
+      formData.originalPrice ||
+      formData.category ||
+      formData.location ||
+      images.length > 0
+    );
+  };
+
+  // Save draft
+  const saveDraft = (silent = false) => {
+    if (!hasContent()) {
+      if (!silent) {
+        showModal(
+          "No Content",
+          "Please add some content before saving as draft.",
+          "warning"
+        );
+      }
+      return;
+    }
+
+    try {
+      const draft = {
+        id: currentDraftId || Date.now().toString(),
+        formData,
+        images: images.map((img) => ({
+          id: img.id,
+          preview: img.preview,
+        })),
+        timestamp: Date.now(),
+      };
+
+      const savedDrafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "[]");
+      const existingIndex = savedDrafts.findIndex((d) => d.id === draft.id);
+
+      if (existingIndex >= 0) {
+        savedDrafts[existingIndex] = draft;
+      } else {
+        savedDrafts.unshift(draft);
+      }
+
+      // Keep only last 10 drafts
+      const limitedDrafts = savedDrafts.slice(0, 10);
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(limitedDrafts));
+
+      setCurrentDraftId(draft.id);
+      setDrafts(limitedDrafts);
+
+      if (!silent) {
+        showModal(
+          "Draft Saved",
+          "Your listing has been saved as a draft!",
+          "success"
+        );
+      }
+    } catch (error) {
+      console.error("Error saving draft:", error);
+      if (!silent) {
+        showModal(
+          "Save Failed",
+          "Failed to save draft. Please try again.",
+          "error"
+        );
+      }
+    }
+  };
+
+  // Load a draft
+  const loadDraft = (draft) => {
+    setFormData(draft.formData);
+    setImages(draft.images);
+    setCurrentDraftId(draft.id);
+    setShowDrafts(false);
+    showModal(
+      "Draft Loaded",
+      "Draft loaded successfully. Continue editing!",
+      "success"
+    );
+  };
+
+  // Delete a draft
+  const deleteDraft = (draftId) => {
+    try {
+      const savedDrafts = JSON.parse(localStorage.getItem(DRAFTS_KEY) || "[]");
+      const updatedDrafts = savedDrafts.filter((d) => d.id !== draftId);
+      localStorage.setItem(DRAFTS_KEY, JSON.stringify(updatedDrafts));
+      setDrafts(updatedDrafts);
+
+      if (currentDraftId === draftId) {
+        setCurrentDraftId(null);
+      }
+
+      showModal("Draft Deleted", "Draft has been removed.", "success");
+    } catch (error) {
+      console.error("Error deleting draft:", error);
+      showModal("Delete Failed", "Failed to delete draft.", "error");
+    }
+  };
+
+  // Clear current form
+  const clearForm = () => {
+    setFormData({
+      title: "",
+      description: "",
+      price: "",
+      originalPrice: "",
+      category: "",
+      condition: "Used",
+      location: "",
+    });
+    setImages([]);
+    setCurrentDraftId(null);
+    setErrors({});
+  };
 
   const showModal = (title, message, type = "info") => {
     setModal({ isOpen: true, title, message, type });
@@ -221,6 +379,19 @@ const PostItem = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Show preview
+  const handlePreview = () => {
+    if (!validateForm()) {
+      showModal(
+        "Incomplete Form",
+        "Please fill all required fields to preview.",
+        "warning"
+      );
+      return;
+    }
+    setShowPreview(true);
+  };
+
   // Handle form submit
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -242,12 +413,22 @@ const PostItem = () => {
     // TODO: Handle form submission to backend (send submitPayload)
     console.log("Form Data:", submitPayload);
 
+    // Delete draft if it was loaded from drafts
+    if (currentDraftId) {
+      deleteDraft(currentDraftId);
+    }
+
     // Show success message
     showModal(
       "Success!",
       "Product posted successfully! (Backend integration pending)",
       "success"
     );
+
+    // Clear form after successful submission
+    setTimeout(() => {
+      clearForm();
+    }, 2000);
   };
 
   const conditions = ["New", "Used", "Fairly Used"];
@@ -262,14 +443,29 @@ const PostItem = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
-      {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl md:text-3xl font-inter font-bold text-[#111827] mb-2">
-          Post New Item
-        </h1>
-        <p className="text-[#4B5563] font-instrument">
-          Fill in the details below to list your item for sale
-        </p>
+      {/* Header with Drafts Button */}
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-inter font-bold text-[#111827] mb-2">
+            Post New Item
+          </h1>
+          <p className="text-[#4B5563] font-instrument">
+            Fill in the details below to list your item for sale
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowDrafts(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-lg font-inter font-medium hover:bg-[#7E22CE] hover:text-white transition-all"
+        >
+          <FaFileAlt />
+          <span className="hidden sm:inline">Drafts</span>
+          {drafts.length > 0 && (
+            <span className="bg-[#7E22CE] text-white px-2 py-0.5 rounded-full text-xs">
+              {drafts.length}
+            </span>
+          )}
+        </button>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -572,7 +768,7 @@ const PostItem = () => {
         </div>
 
         {/* Submit Buttons */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           <Button
             type="button"
             variant="outline"
@@ -582,11 +778,180 @@ const PostItem = () => {
           >
             Cancel
           </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="flex-1 flex items-center justify-center gap-2"
+            onClick={() => saveDraft(false)}
+          >
+            <FaSave />
+            Save Draft
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            className="flex-1 flex items-center justify-center gap-2 border-[#7E22CE] text-[#7E22CE] hover:bg-[#7E22CE] hover:text-white"
+            onClick={handlePreview}
+          >
+            <FaEye />
+            Preview
+          </Button>
           <Button type="submit" variant="primary" size="lg" className="flex-1">
             Post Item
           </Button>
         </div>
       </form>
+
+      {/* Drafts Modal */}
+      <Modal
+        isOpen={showDrafts}
+        onClose={() => setShowDrafts(false)}
+        title="Saved Drafts"
+      >
+        <div className="max-h-96 overflow-y-auto">
+          {drafts.length === 0 ? (
+            <div className="text-center py-8">
+              <FaFileAlt className="text-5xl text-gray-300 mx-auto mb-3" />
+              <p className="text-[#4B5563] font-instrument">No saved drafts</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {drafts.map((draft) => (
+                <div
+                  key={draft.id}
+                  className="border border-gray-200 rounded-lg p-4 hover:border-[#7E22CE] transition-all"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-inter font-semibold text-[#111827] truncate mb-1">
+                        {draft.formData.title || "Untitled Draft"}
+                      </h3>
+                      <p className="text-sm text-[#4B5563] font-instrument truncate mb-2">
+                        {draft.formData.description || "No description"}
+                      </p>
+                      <div className="flex items-center gap-2 text-xs text-[#6B7280] font-instrument">
+                        <span>
+                          {new Date(draft.timestamp).toLocaleDateString()} at{" "}
+                          {new Date(draft.timestamp).toLocaleTimeString()}
+                        </span>
+                        {draft.images.length > 0 && (
+                          <span>• {draft.images.length} image(s)</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => loadDraft(draft)}
+                        className="px-3 py-1.5 bg-[#7E22CE] text-white rounded-lg text-sm font-inter font-medium hover:bg-[#6b1bb3] transition-all"
+                      >
+                        Load
+                      </button>
+                      <button
+                        onClick={() => deleteDraft(draft.id)}
+                        className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </Modal>
+
+      {/* Preview Modal */}
+      <Modal
+        isOpen={showPreview}
+        onClose={() => setShowPreview(false)}
+        title="Preview Your Listing"
+      >
+        <div className="space-y-4">
+          {/* Preview Images */}
+          {images.length > 0 && (
+            <div className="relative h-64 bg-gray-100 rounded-lg overflow-hidden">
+              <img
+                src={images[0].preview}
+                alt="Preview"
+                className="w-full h-full object-cover"
+              />
+              {images.length > 1 && (
+                <div className="absolute bottom-2 right-2 bg-black/60 text-white px-2 py-1 rounded text-xs font-inter">
+                  +{images.length - 1} more
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Preview Details */}
+          <div className="space-y-3">
+            <div>
+              <h2 className="text-xl font-inter font-bold text-[#111827] mb-1">
+                {formData.title}
+              </h2>
+              <div className="flex items-center gap-2 text-sm text-[#6B7280] font-instrument">
+                <FaMapMarkerAlt className="text-[#7E22CE]" />
+                <span>{formData.location}</span>
+              </div>
+            </div>
+
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-inter font-bold text-[#7E22CE]">
+                ₦{formData.price}
+              </span>
+              {formData.originalPrice && (
+                <span className="text-sm text-[#6B7280] line-through font-instrument">
+                  ₦{formData.originalPrice}
+                </span>
+              )}
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              <span className="px-3 py-1 bg-[#7E22CE]/10 text-[#7E22CE] rounded-full text-sm font-inter">
+                {categoriesData.find((c) => c.id === formData.category)?.name}
+              </span>
+              <span className="px-3 py-1 bg-gray-100 text-[#4B5563] rounded-full text-sm font-inter">
+                {formData.condition}
+              </span>
+            </div>
+
+            <div>
+              <h3 className="font-inter font-semibold text-[#111827] mb-2">
+                Description
+              </h3>
+              <p className="text-[#4B5563] font-instrument whitespace-pre-wrap">
+                {formData.description}
+              </p>
+            </div>
+          </div>
+
+          {/* Preview Actions */}
+          <div className="flex gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              size="lg"
+              className="flex-1"
+              onClick={() => setShowPreview(false)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="primary"
+              size="lg"
+              className="flex-1"
+              onClick={(e) => {
+                setShowPreview(false);
+                handleSubmit(e);
+              }}
+            >
+              Publish Now
+            </Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Modal */}
       <Modal
