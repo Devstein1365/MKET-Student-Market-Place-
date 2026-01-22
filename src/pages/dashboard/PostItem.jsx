@@ -142,11 +142,7 @@ const PostItem = () => {
     // Check if content has changed since last save
     if (!hasChangedSinceLastSave()) {
       if (!silent) {
-        showModal(
-          "No Changes",
-          "No changes detected since last save.",
-          "info"
-        );
+        showModal("No Changes", "No changes detected since last save.", "info");
       }
       return;
     }
@@ -549,7 +545,11 @@ const PostItem = () => {
                         saveDraft(true);
                       }
                       clearForm();
-                      showModal("New Draft Started", "You can now create a new listing!", "success");
+                      showModal(
+                        "New Draft Started",
+                        "You can now create a new listing!",
+                        "success"
+                      );
                     },
                     showCancel: true,
                   });
@@ -1030,7 +1030,8 @@ const PostItem = () => {
             <div className="flex flex-wrap gap-2">
               {formData.category && (
                 <span className="px-3 py-1 bg-[#7E22CE]/10 text-[#7E22CE] rounded-full text-sm font-inter">
-                  {categoriesData.find((c) => c.id === formData.category)?.name || formData.category}
+                  {categoriesData.find((c) => c.id === formData.category)
+                    ?.name || formData.category}
                 </span>
               )}
               <span className="px-3 py-1 bg-gray-100 text-[#4B5563] rounded-full text-sm font-inter">
