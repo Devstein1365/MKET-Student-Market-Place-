@@ -16,6 +16,7 @@ import {
   FaFileAlt,
   FaPaperPlane,
   FaBan,
+  FaPlus,
 } from "react-icons/fa";
 import Button from "../../components/shared/Button";
 import Input from "../../components/shared/Input";
@@ -60,6 +61,8 @@ const PostItem = () => {
     title: "",
     message: "",
     type: "info",
+    onConfirm: null,
+    showCancel: false,
   });
 
   // Load drafts on mount
@@ -513,21 +516,59 @@ const PostItem = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-4 md:p-6">
-      {/* Header with Drafts Button */}
-      <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
+      {/* Header with Drafts and New Button */}
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div className="flex-1">
           <h1 className="text-2xl md:text-3xl font-inter font-bold text-[#111827] mb-2">
             Post New Item
           </h1>
           <p className="text-[#4B5563] font-instrument">
             Fill in the details below to list your item for sale
           </p>
+          {currentDraftId && (
+            <p className="text-xs text-[#7E22CE] font-instrument mt-1">
+              📝 Editing draft - changes auto-save
+            </p>
+          )}
         </div>
-        <button
-          type="button"
-          onClick={() => setShowDrafts(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-lg font-inter font-medium hover:bg-[#7E22CE] hover:text-white transition-all"
-        >
+        <div className="flex gap-2">
+          {hasContent() && (
+            <button
+              type="button"
+              onClick={() => {
+                if (hasContent()) {
+                  setModal({
+                    isOpen: true,
+                    title: "Start New Draft?",
+                    message: hasChangedSinceLastSave()
+                      ? "You have unsaved changes. Save current draft before starting a new one?"
+                      : "Clear current form and start a new listing?",
+                    type: "confirm",
+                    onConfirm: () => {
+                      if (hasChangedSinceLastSave()) {
+                        saveDraft(true);
+                      }
+                      clearForm();
+                      showModal("New Draft Started", "You can now create a new listing!", "success");
+                    },
+                    showCancel: true,
+                  });
+                } else {
+                  clearForm();
+                }
+              }}
+              className="flex items-center gap-2 px-3 py-2 bg-white border-2 border-gray-300 text-gray-700 rounded-lg font-inter font-medium hover:bg-gray-50 transition-all"
+              title="Start a new draft"
+            >
+              <FaPlus />
+              <span className="hidden sm:inline text-sm">New</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setShowDrafts(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-lg font-inter font-medium hover:bg-[#7E22CE] hover:text-white transition-all"
+          >
           <FaFileAlt />
           <span className="hidden sm:inline">Drafts</span>
           {drafts.length > 0 && (
