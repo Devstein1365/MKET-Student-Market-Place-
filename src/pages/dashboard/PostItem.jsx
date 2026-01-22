@@ -569,14 +569,15 @@ const PostItem = () => {
             onClick={() => setShowDrafts(true)}
             className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-[#7E22CE] text-[#7E22CE] rounded-lg font-inter font-medium hover:bg-[#7E22CE] hover:text-white transition-all"
           >
-          <FaFileAlt />
-          <span className="hidden sm:inline">Drafts</span>
-          {drafts.length > 0 && (
-            <span className="bg-[#7E22CE] text-white px-2 py-0.5 rounded-full text-xs">
-              {drafts.length}
-            </span>
-          )}
-        </button>
+            <FaFileAlt />
+            <span className="hidden sm:inline">Drafts</span>
+            {drafts.length > 0 && (
+              <span className="bg-[#7E22CE] text-white px-2 py-0.5 rounded-full text-xs">
+                {drafts.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
