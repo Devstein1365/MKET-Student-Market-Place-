@@ -428,7 +428,7 @@ This project is licensed under the MIT License. Feel free to use, modify, and di
 
 - **Developer**: Oga Gospel Oligwu
 - **Email**: ogagospel9@gmail.com
-- **GitHub**: github.com/Devstein1365
+- **GitHub**: https://github.com/Devstein1365
 
 For questions, issues, or feature requests, please open an issue on GitHub.
 
